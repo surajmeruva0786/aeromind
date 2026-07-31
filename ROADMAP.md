@@ -34,18 +34,18 @@ implemented, committed, and pushed individually. Checked items are done.
 - [x] 16. `scripts/verify_environment.py`
 
 ## Phase 2 — Data layer (17-28)
-- [ ] 17. `src/data/synthetic.py` — synthetic multi-channel EEG generator with graded workload signal
-- [ ] 18. `src/data/dataset.py` — PyTorch Dataset for epoched EEG + labels
-- [ ] 19. `src/data/transforms.py` — augmentations (channel dropout, time shift, noise, mixup)
-- [ ] 20. `src/data/splits.py` — subject-dependent / LOSO / cross-dataset splitters
-- [ ] 21. `scripts/download_maus.py`
-- [ ] 22. `scripts/download_stew.py`
-- [ ] 23. `scripts/download_deap.py` (registration-gated, documents manual steps)
-- [ ] 24. `scripts/make_synthetic_dataset.py` — generate a full synthetic dataset on disk
-- [ ] 25. `data/README.md` finalize with checksums section
-- [ ] 26. Unit tests for synthetic generator
-- [ ] 27. Unit tests for dataset/splits
-- [ ] 28. Unit tests for transforms
+- [x] 17. `src/data/synthetic.py` — synthetic multi-channel EEG generator with graded workload signal
+- [x] 18. `src/data/dataset.py` — PyTorch Dataset for epoched EEG + labels
+- [x] 19. `src/data/transforms.py` — augmentations (channel dropout, time shift, noise, mixup)
+- [x] 20. `src/data/splits.py` — subject-dependent / LOSO / cross-dataset splitters
+- [x] 21. `scripts/download_maus.py` (corrected: MAUS is ECG/PPG/GSR, not EEG — reference-only)
+- [x] 22. `scripts/download_stew.py` (real EEG dataset; automated HF path + manual IEEE DataPort path)
+- [x] 23. `scripts/download_deap.py` (registration-gated, documents manual steps)
+- [x] 24. `scripts/make_synthetic_dataset.py` — generate a full synthetic dataset on disk
+- [x] 25. `data/README.md` finalize (corrected dataset facts, no checksums needed — datasets are gated/synthetic, not redistributed)
+- [x] 26. Unit tests for synthetic generator
+- [x] 27. Unit tests for dataset/splits
+- [x] 28. Unit tests for transforms
 
 ## Phase 3 — Preprocessing pipeline (29-40)
 - [ ] 29. `src/preprocessing/filters.py` — bandpass/notch
