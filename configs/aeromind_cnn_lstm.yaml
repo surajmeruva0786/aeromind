@@ -1,0 +1,35 @@
+data:
+  dataset: synthetic
+  processed_dir: data/processed/synthetic
+  n_channels: 7
+  sfreq: 256.0
+  epoch_seconds: 2.0
+  sequence_length: 15
+
+model:
+  name: aeromind_cnn_lstm
+  primary_capsules: 32          # unused by this model; kept for schema parity
+  primary_capsule_dim: 8
+  digit_capsule_dim: 16
+  routing_iters: 3
+  lstm_hidden: 64
+  n_workload_classes: 3
+  n_fatigue_classes: 2
+
+train:
+  optimizer: adamw
+  lr: 0.0005
+  weight_decay: 0.0005
+  batch_size: 64
+  epochs: 150
+  early_stop_patience: 20
+  lr_patience: 8
+  lr_factor: 0.5
+  mixed_precision: true
+  seed: 42
+  protocol: loso
+  workload_weight: 0.6
+  fatigue_weight: 0.3
+  reconstruction_weight: 0.0    # no capsule reconstruction head on this baseline
+
+output_dir: runs/cnn_lstm_maus_loso

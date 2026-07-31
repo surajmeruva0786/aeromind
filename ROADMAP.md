@@ -24,14 +24,14 @@ implemented, committed, and pushed individually. Checked items are done.
 - [x] 8. `data/README.md` — dataset access instructions
 
 ## Phase 1 — Config & utils (9-16)
-- [ ] 9. `src/utils/seed.py` — reproducibility
-- [ ] 10. `src/utils/logging_utils.py`
-- [ ] 11. `src/utils/metrics.py` — accuracy/F1/kappa/ECE
-- [ ] 12. `src/utils/config.py` — YAML config loader + dataclasses
-- [ ] 13. `configs/aeromind_capsnet.yaml`
-- [ ] 14. `configs/aeromind_cnn_lstm.yaml`
-- [ ] 15. `configs/aeromind_eegnet.yaml`
-- [ ] 16. `scripts/verify_environment.py`
+- [x] 9. `src/utils/seed.py` — reproducibility
+- [x] 10. `src/utils/logging_utils.py`
+- [x] 11. `src/utils/metrics.py` — accuracy/F1/kappa/ECE
+- [x] 12. `src/utils/config.py` — YAML config loader + dataclasses
+- [x] 13. `configs/aeromind_capsnet.yaml`
+- [x] 14. `configs/aeromind_cnn_lstm.yaml`
+- [x] 15. `configs/aeromind_eegnet.yaml`
+- [x] 16. `scripts/verify_environment.py`
 
 ## Phase 2 — Data layer (17-28)
 - [ ] 17. `src/data/synthetic.py` — synthetic multi-channel EEG generator with graded workload signal
