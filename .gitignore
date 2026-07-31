@@ -1,0 +1,62 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.Python
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+conda-meta/
+
+# --- Data (raw and processed EEG are large/binary; never commit) ---
+data/raw/
+data/processed/
+*.edf
+*.bdf
+*.fif
+*.set
+*.fdt
+
+# --- Training artifacts ---
+runs/
+*.ckpt
+*.pt
+*.pth
+
+# --- Results (keep small summary files, ignore large plots/exports) ---
+results/**/*.png
+results/**/*.csv
+!results/**/README.md
+!results/*.md
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- Testing / coverage ---
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# --- Tooling ---
+.ruff_cache/
+.mypy_cache/
+
+# --- OS / IDE ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --- Secrets / env ---
+.env
+*.local
+
+# --- Streamlit ---
+.streamlit/secrets.toml
