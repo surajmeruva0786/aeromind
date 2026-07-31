@@ -14,14 +14,14 @@ implemented, committed, and pushed individually. Checked items are done.
 > claims about a specific checkpoint in this repo, and are labeled as such.
 
 ## Phase 0 — Project scaffolding (1-8)
-- [ ] 1. Directory skeleton (`app/, configs/, data/, notebooks/, results/, scripts/, src/, tests/, .github/`)
-- [ ] 2. `.gitignore`
-- [ ] 3. `LICENSE` (MIT)
-- [ ] 4. `requirements.txt` + `requirements-dev.txt`
-- [ ] 5. `pyproject.toml` (packaging + tool config: black/ruff/pytest)
-- [ ] 6. `src/__init__.py` package skeleton for all subpackages
-- [ ] 7. `.editorconfig`, `CONTRIBUTING.md`
-- [ ] 8. `data/README.md` — dataset access instructions
+- [x] 1. Directory skeleton (`app/, configs/, data/, notebooks/, results/, scripts/, src/, tests/, .github/`)
+- [x] 2. `.gitignore`
+- [x] 3. `LICENSE` (MIT)
+- [x] 4. `requirements.txt` + `requirements-dev.txt`
+- [x] 5. `pyproject.toml` (packaging + tool config: black/ruff/pytest)
+- [x] 6. `src/__init__.py` package skeleton for all subpackages
+- [x] 7. `.editorconfig`, `CONTRIBUTING.md`
+- [x] 8. `data/README.md` — dataset access instructions
 
 ## Phase 1 — Config & utils (9-16)
 - [ ] 9. `src/utils/seed.py` — reproducibility
