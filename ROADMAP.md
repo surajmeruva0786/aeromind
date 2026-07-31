@@ -62,18 +62,18 @@ implemented, committed, and pushed individually. Checked items are done.
 - [x] 40. Preprocessing performance pass (vectorized scipy sosfiltfilt; ICA rank capped to avoid unstable/slow fits)
 
 ## Phase 4 — Feature engineering (41-52)
-- [ ] 41. `src/features/spectral.py` — Welch PSD, band powers
-- [ ] 42. `src/features/temporal.py` — Hjorth, kurtosis, skew, line length, ZCR
-- [ ] 43. `src/features/connectivity.py` — PLV theta/alpha
-- [ ] 44. `src/features/pipeline.py` — feature concatenation for classical baseline
-- [ ] 45. Unit tests: spectral
-- [ ] 46. Unit tests: temporal
-- [ ] 47. Unit tests: connectivity
-- [ ] 48. `notebooks/01_dataset_eda.ipynb`
-- [ ] 49. `notebooks/03_feature_visualisation.ipynb`
-- [ ] 50. Classical baseline model (sklearn RandomForest/SVM on features) for sanity-check comparison
-- [ ] 51. `src/evaluation/baseline.py`
-- [ ] 52. Feature engineering docs
+- [x] 41. `src/features/spectral.py` — Welch PSD, band powers
+- [x] 42. `src/features/temporal.py` — Hjorth, kurtosis, skew, line length, ZCR
+- [x] 43. `src/features/connectivity.py` — PLV theta/alpha
+- [x] 44. `src/features/pipeline.py` — feature concatenation for classical baseline
+- [x] 45. Unit tests: spectral
+- [x] 46. Unit tests: temporal
+- [x] 47. Unit tests: connectivity
+- [x] 48. `notebooks/01_dataset_eda.ipynb` (executed, real output committed)
+- [x] 49. `notebooks/03_feature_visualisation.ipynb` (executed, real output committed)
+- [x] 50. Classical baseline model (sklearn RandomForest/SVM on features) — measured >40% on 3-class synthetic (chance ~33%), see tests/test_baseline.py
+- [x] 51. `src/evaluation/baseline.py`
+- [x] 52. Feature engineering docs (`src/features/README.md`)
 
 ## Phase 5 — Model architectures (53-66)
 - [ ] 53. `src/models/layers.py` — squash, PrimaryCapsule, DigitCapsule, dynamic routing
