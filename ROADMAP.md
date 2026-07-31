@@ -13,6 +13,53 @@ implemented, committed, and pushed individually. Checked items are done.
 > the aspirational numbers in the README §18 are targets from literature, not
 > claims about a specific checkpoint in this repo, and are labeled as such.
 
+## Session handoff (2026-08-01, stopped mid-Phase-5)
+
+**Done and pushed (commits `c51fc85`..`5a1b92a`, Phases 0-4, steps 1-52):**
+project scaffolding, config system, the synthetic EEG generator + dataset/
+transforms/splits, real dataset download scripts (with a factual correction:
+MAUS is IEEE DataPort ECG/PPG/GSR, not open EEG — STEW is now the primary
+real-EEG dataset, with an automated Hugging Face download path), the full
+MNE-based preprocessing pipeline (filters, PREP-style bad-channel handling,
+real ICLabel-backed ICA, epoching), and spectral/temporal/connectivity
+feature extraction plus a classical RandomForest baseline. All of this has
+passing tests (40 at last count) and executed notebooks with real output.
+An isolated `.venv` (see below) has all deps installed.
+
+**In progress (uncommitted at stop, but working):** `src/models/layers.py`
+(squash, PrimaryCapsule1D, DigitCapsuleRouting) and
+`src/models/aeromind_capsnet.py` (full CapsNet+BiLSTM multi-task model).
+Both are smoke-tested — a forward pass on `torch.randn(2, 15, 7, 512)` runs
+and produces correctly-shaped outputs, ~460k parameters. Note: the
+reconstruction decoder targets a downsampled (avg-pooled) version of the
+epoch rather than the full raw waveform — see the module docstring in
+`aeromind_capsnet.py` for why (full-waveform reconstruction would need a
+~4M-param decoder alone). This is why the measured param count (~460k)
+differs from the README's ~720k figure; both are legitimate architecture
+choices, not a training result, so this isn't a "measured vs. target"
+honesty issue — just a documented design deviation.
+
+**Next steps, in order:**
+1. `src/models/aeromind_cnn_lstm.py` (baseline 1, no capsules)
+2. `src/models/aeromind_eegnet.py` (baseline 2, EEGNet-style)
+3. `src/models/losses.py` (margin loss + multi-task weighted sum)
+4. `src/models/registry.py` (name -> model factory, reads `ModelConfig.name`)
+5. Unit tests for all of the above (shapes, gradient flow / no-NaN backward
+   pass, parameter counts) — write `tests/test_models.py`
+6. `src/utils/checkpoint.py`, `src/models/README.md` (currently a stub),
+   `src/models/__init__.py` exports
+7. Commit Phase 5, then continue to Phase 6 (training pipeline) per the
+   phase list below.
+
+**Environment note:** always use `Z:\aeromind\.venv\Scripts\python.exe`
+(or activate `.venv`) — do NOT `pip install` into the global Python
+interpreter. That was tried once this session, upgraded the global torch,
+and broke version pins for unrelated packages (torchvision/torchaudio/
+facenet-pytorch) already on this machine; it was reverted. `.venv` has
+everything needed (torch, mne, mne-icalabel, shap, streamlit, nbformat,
+nbconvert, ipykernel — kernel registered as `aeromind-venv`) already
+installed via `requirements-dev.txt`.
+
 ## Phase 0 — Project scaffolding (1-8)
 - [x] 1. Directory skeleton (`app/, configs/, data/, notebooks/, results/, scripts/, src/, tests/, .github/`)
 - [x] 2. `.gitignore`
@@ -76,8 +123,8 @@ implemented, committed, and pushed individually. Checked items are done.
 - [x] 52. Feature engineering docs (`src/features/README.md`)
 
 ## Phase 5 — Model architectures (53-66)
-- [ ] 53. `src/models/layers.py` — squash, PrimaryCapsule, DigitCapsule, dynamic routing
-- [ ] 54. `src/models/aeromind_capsnet.py`
+- [x] 53. `src/models/layers.py` — squash, PrimaryCapsule, DigitCapsule, dynamic routing
+- [x] 54. `src/models/aeromind_capsnet.py` (smoke-tested: forward pass runs, ~460k params — see session handoff note at top of this file for why that differs from README's ~720k figure)
 - [ ] 55. `src/models/aeromind_cnn_lstm.py`
 - [ ] 56. `src/models/aeromind_eegnet.py`
 - [ ] 57. `src/models/losses.py` — margin loss + multi-task weighted loss
