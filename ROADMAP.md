@@ -48,18 +48,18 @@ implemented, committed, and pushed individually. Checked items are done.
 - [x] 28. Unit tests for transforms
 
 ## Phase 3 — Preprocessing pipeline (29-40)
-- [ ] 29. `src/preprocessing/filters.py` — bandpass/notch
-- [ ] 30. `src/preprocessing/prep_pipeline.py` — bad channel detection + interpolation
-- [ ] 31. `src/preprocessing/ica_artefact.py` — ICA artefact rejection (ICLabel optional)
-- [ ] 32. `src/preprocessing/epoching.py` — windowing + z-score + rejection
-- [ ] 33. `src/preprocessing/run.py` — CLI entrypoint `python -m src.preprocessing.run`
-- [ ] 34. Preprocessing config validation
-- [ ] 35. Unit tests: filters
-- [ ] 36. Unit tests: epoching
-- [ ] 37. Unit tests: end-to-end preprocessing on synthetic raw
-- [ ] 38. `notebooks/02_preprocessing_demo.ipynb`
-- [ ] 39. Preprocessing CLI docs
-- [ ] 40. Preprocessing performance pass (vectorization check)
+- [x] 29. `src/preprocessing/filters.py` — bandpass/notch
+- [x] 30. `src/preprocessing/prep_pipeline.py` — bad channel detection + interpolation
+- [x] 31. `src/preprocessing/ica_artefact.py` — ICA artefact rejection (real ICLabel via mne-icalabel, heuristic fallback)
+- [x] 32. `src/preprocessing/epoching.py` — windowing + z-score + rejection
+- [x] 33. `src/preprocessing/run.py` — CLI entrypoint `python -m src.preprocessing.run`
+- [x] 34. Preprocessing config validation (argparse choices + fail-fast checks in run.py)
+- [x] 35. Unit tests: filters
+- [x] 36. Unit tests: epoching
+- [x] 37. Unit tests: end-to-end preprocessing on synthetic raw
+- [x] 38. `notebooks/02_preprocessing_demo.ipynb` (executed, real output committed)
+- [x] 39. Preprocessing CLI docs (`src/preprocessing/README.md`)
+- [x] 40. Preprocessing performance pass (vectorized scipy sosfiltfilt; ICA rank capped to avoid unstable/slow fits)
 
 ## Phase 4 — Feature engineering (41-52)
 - [ ] 41. `src/features/spectral.py` — Welch PSD, band powers
