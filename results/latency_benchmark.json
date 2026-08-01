@@ -1,0 +1,38 @@
+[
+  {
+    "model": "aeromind_capsnet",
+    "device": "cpu",
+    "n_predictions": 103,
+    "mean_ms": 13.72895048517571,
+    "p50_ms": 13.494099956005812,
+    "p95_ms": 16.099600004963577,
+    "max_ms": 20.30239999294281,
+    "hop_s": 0.5,
+    "realtime_budget_ms": 500.0,
+    "realtime_capable": true
+  },
+  {
+    "model": "aeromind_cnn_lstm",
+    "device": "cpu",
+    "n_predictions": 103,
+    "mean_ms": 9.684399997779321,
+    "p50_ms": 9.63330001104623,
+    "p95_ms": 11.096400034148246,
+    "max_ms": 16.526299994438887,
+    "hop_s": 0.5,
+    "realtime_budget_ms": 500.0,
+    "realtime_capable": true
+  },
+  {
+    "model": "aeromind_eegnet",
+    "device": "cpu",
+    "n_predictions": 103,
+    "mean_ms": 6.509164075290296,
+    "p50_ms": 6.008800002746284,
+    "p95_ms": 6.884700036607683,
+    "max_ms": 56.962499977089465,
+    "hop_s": 0.5,
+    "realtime_budget_ms": 500.0,
+    "realtime_capable": true
+  }
+]

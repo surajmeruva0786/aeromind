@@ -76,8 +76,19 @@ probe reported `passed: false`, which is expected and honestly documented
 given that checkpoint's known workload-head majority-class collapse
 (`results/synthetic_smoke_test.md`); the classical spectral-SHAP path
 (a separate model, unaffected by the deep checkpoint's training quality)
-did recover the expected theta-dominant signature. Full suite: 71 tests
-passing.
+did recover the expected theta-dominant signature.
+
+**Phase 9 completed this session:** `src/inference/stream.py`
+(`SlidingWindowBuffer`, `EWMASmoother`, `StreamingEngine` tying both to a
+loaded model), `replay.py` (synthetic + real-file offline replay, paced or
+fast), `lsl_source.py` (guarded `pylsl` import, clear `RuntimeError` when
+unavailable), `websocket_server.py` (`PredictionBroadcastServer` on the
+`websockets` library), `tests/test_inference.py` (8 tests, including a
+real WebSocket round-trip), and `src/inference/README.md`. Ran
+`scripts/benchmark_latency.py` for real on this CPU-only machine — all
+three models comfortably clear the 500ms (0.5s hop) real-time budget:
+CapsNet p95 16ms, CNN-LSTM p95 11ms, EEGNet p95 7ms
+(`results/latency_benchmark.json`). Full suite: 79 tests passing.
 
 **Environment note:** always use `Z:\aeromind\.venv\Scripts\python.exe`
 (or activate `.venv`) — do NOT `pip install` into the global Python
@@ -202,13 +213,13 @@ installed via `requirements-dev.txt`.
 - [x] 95. XAI docs (`src/xai/README.md`)
 
 ## Phase 9 — Real-time inference (96-102)
-- [ ] 96. `src/inference/stream.py` — sliding window engine, EWMA smoothing
-- [ ] 97. `src/inference/replay.py` — offline `.edf`/synthetic replay source at real-time rate
-- [ ] 98. `src/inference/lsl_source.py` — optional LSL live source (guarded import)
-- [ ] 99. `src/inference/websocket_server.py` — downstream dashboard feed
-- [ ] 100. Unit tests: streaming window buffer logic
-- [ ] 101. Latency benchmark script + measured result on this machine (CPU)
-- [ ] 102. Inference docs
+- [x] 96. `src/inference/stream.py` — sliding window engine, EWMA smoothing
+- [x] 97. `src/inference/replay.py` — offline `.edf`/synthetic replay source at real-time rate
+- [x] 98. `src/inference/lsl_source.py` — optional LSL live source (guarded import)
+- [x] 99. `src/inference/websocket_server.py` — downstream dashboard feed
+- [x] 100. Unit tests: streaming window buffer logic (`tests/test_inference.py`, 8 tests)
+- [x] 101. Latency benchmark script + measured result on this machine (CPU) — `scripts/benchmark_latency.py`, `results/latency_benchmark.json` (all 3 models well under the 500ms hop budget)
+- [x] 102. Inference docs (`src/inference/README.md`)
 
 ## Phase 10 — Streamlit demo app (103-108)
 - [ ] 103. `app/streamlit_app.py` — live EEG plot, probability bars, fatigue indicator
