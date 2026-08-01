@@ -1,0 +1,35 @@
+name: Docker build check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Dockerfile exists
+        id: check
+        run: |
+          if [ -f Dockerfile ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No Dockerfile at repo root yet (Phase 12) — skipping build check."
+          fi
+
+      - name: Set up Docker Buildx
+        if: steps.check.outputs.exists == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image (no push)
+        if: steps.check.outputs.exists == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: aeromind:ci-check
