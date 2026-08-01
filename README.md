@@ -2,11 +2,15 @@
 
 > **EEG-Based Cognitive Fatigue and Mental Workload Detection for Aircrew and High-Stakes Operators**
 
+![CI](https://github.com/surajmeruva0786/aeromind/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.2+-red)
 ![MNE-Python](https://img.shields.io/badge/MNE--Python-1.6-green)
+![Coverage](https://img.shields.io/badge/coverage-86%25-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Status](https://img.shields.io/badge/Status-Research-yellow)
+
+<sub>Coverage badge is a static snapshot from the last measured `pytest --cov` run (see `ROADMAP.md` Phase 11), not a live Codecov integration — re-run coverage locally for current numbers.</sub>
 
 A research-grade pipeline that continuously monitors a subject's electroencephalogram (EEG) and predicts their current **mental workload** and **cognitive fatigue** state in real time. The system uses a Capsule Network with dynamic routing for spatial–spectral encoding, combined with an LSTM for temporal modelling, and produces channel-level SHAP attributions on a 2D scalp topography so that domain experts can audit every prediction.
 

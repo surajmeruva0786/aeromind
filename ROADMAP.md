@@ -101,7 +101,29 @@ app.streamlit_app` never touches the Streamlit runtime.
 `tests/test_app.py` (5 tests) uses `streamlit.testing.v1.AppTest` to
 actually render the app and click controls headlessly; also manually
 verified with a real `streamlit run` server. `app/README.md` documents
-usage. Full suite: 84 tests passing.
+usage.
+
+**Phase 11 completed this session:** normalized formatting across the
+whole codebase (`ruff --fix` + `black`, both were already configured in
+`pyproject.toml` since Phase 0 but hadn't been enforced), added
+`tests/test_lsl_source.py` (guarded-import failure path) and
+`tests/test_xai.py::test_run_explain_end_to_end` (full `explain.py`
+CLI integration test) to close coverage gaps, `.github/workflows/ci.yml`
+(ruff + black + pytest-cov on every push/PR), `.github/workflows/docker.yml`
+(build-health check, no-ops until Phase 12 adds a Dockerfile),
+`.pre-commit-config.yaml` (ruff/black + standard hygiene hooks, verified
+via `pre-commit run --all-files`), and a measured 86% coverage badge in
+`README.md`. `CONTRIBUTING.md` documents all of this. Full suite: **86
+tests passing**.
+
+*Note on test flakiness*: one intermittent failure in
+`tests/test_training.py` was observed during this phase's full-suite run
+(pre-formatting). Both affected tests use fully seeded, independent RNGs
+(`np.random.default_rng`, not global state) for every random decision in
+their code path, so the failure was not reproducible despite ~10 repeated
+full-suite and targeted re-runs afterward. Logged here rather than
+silently ignored — if it recurs, the fully-seeded/deterministic design
+argument above should be re-examined, not assumed to still hold.
 
 **Environment note:** always use `Z:\aeromind\.venv\Scripts\python.exe`
 (or activate `.venv`) — do NOT `pip install` into the global Python
@@ -243,12 +265,12 @@ installed via `requirements-dev.txt`.
 - [x] 108. App usage docs (`app/README.md`)
 
 ## Phase 11 — Tests, CI, quality (109-114)
-- [ ] 109. `pytest.ini` / test config, `tests/conftest.py` fixtures
-- [ ] 110. Full test suite run — fix failures
-- [ ] 111. `.github/workflows/ci.yml` — lint + test on push
-- [ ] 112. `.github/workflows/docker.yml` — build check
-- [ ] 113. Pre-commit config (ruff/black)
-- [ ] 114. Coverage report + badge
+- [x] 109. `pytest.ini` / test config, `tests/conftest.py` fixtures (test config lives in `pyproject.toml`'s `[tool.pytest.ini_options]`, already in place since Phase 0; fixtures already in `tests/conftest.py` since Phase 2 — this step formalizes/documents both, see `CONTRIBUTING.md`)
+- [x] 110. Full test suite run — fix failures (ran `ruff --fix` + `black` across `src/app/tests/scripts`, normalizing formatting that had drifted since earlier phases; one intermittent, non-reproducible failure was investigated across ~10 repeat runs and could not be reproduced with a root cause — see note below)
+- [x] 111. `.github/workflows/ci.yml` — lint + test on push
+- [x] 112. `.github/workflows/docker.yml` — build check (gracefully no-ops if `Dockerfile` isn't present yet — see Phase 12)
+- [x] 113. Pre-commit config (ruff/black) — `.pre-commit-config.yaml`, verified clean via `pre-commit run --all-files`
+- [x] 114. Coverage report + badge — measured 86% (`pytest --cov=src --cov=app`), static badge in `README.md`
 
 ## Phase 12 — Packaging & deployment (115-120)
 - [ ] 115. `Dockerfile` (CPU) + `.dockerignore`
