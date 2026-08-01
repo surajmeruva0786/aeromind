@@ -13,43 +13,30 @@ implemented, committed, and pushed individually. Checked items are done.
 > the aspirational numbers in the README §18 are targets from literature, not
 > claims about a specific checkpoint in this repo, and are labeled as such.
 
-## Session handoff (2026-08-01, stopped mid-Phase-5)
+## Session handoff (2026-08-01, resumed and continuing through Phase 12)
 
-**Done and pushed (commits `c51fc85`..`5a1b92a`, Phases 0-4, steps 1-52):**
-project scaffolding, config system, the synthetic EEG generator + dataset/
-transforms/splits, real dataset download scripts (with a factual correction:
-MAUS is IEEE DataPort ECG/PPG/GSR, not open EEG — STEW is now the primary
-real-EEG dataset, with an automated Hugging Face download path), the full
-MNE-based preprocessing pipeline (filters, PREP-style bad-channel handling,
-real ICLabel-backed ICA, epoching), and spectral/temporal/connectivity
-feature extraction plus a classical RandomForest baseline. All of this has
-passing tests (40 at last count) and executed notebooks with real output.
-An isolated `.venv` (see below) has all deps installed.
+**Done and pushed (commits `c51fc85`..`0b5bcea`, Phases 0-4, steps 1-52, plus
+Phase 5 layers/capsnet):** project scaffolding, config system, the synthetic
+EEG generator + dataset/transforms/splits, real dataset download scripts
+(with a factual correction: MAUS is IEEE DataPort ECG/PPG/GSR, not open EEG
+— STEW is now the primary real-EEG dataset, with an automated Hugging Face
+download path), the full MNE-based preprocessing pipeline (filters,
+PREP-style bad-channel handling, real ICLabel-backed ICA, epoching), and
+spectral/temporal/connectivity feature extraction plus a classical
+RandomForest baseline, and the CapsNet layers + AeroMind-CapsNet model. All
+of this has passing tests and executed notebooks with real output. An
+isolated `.venv` (see below) has all deps installed.
 
-**In progress (uncommitted at stop, but working):** `src/models/layers.py`
-(squash, PrimaryCapsule1D, DigitCapsuleRouting) and
-`src/models/aeromind_capsnet.py` (full CapsNet+BiLSTM multi-task model).
-Both are smoke-tested — a forward pass on `torch.randn(2, 15, 7, 512)` runs
-and produces correctly-shaped outputs, ~460k parameters. Note: the
-reconstruction decoder targets a downsampled (avg-pooled) version of the
-epoch rather than the full raw waveform — see the module docstring in
-`aeromind_capsnet.py` for why (full-waveform reconstruction would need a
-~4M-param decoder alone). This is why the measured param count (~460k)
-differs from the README's ~720k figure; both are legitimate architecture
-choices, not a training result, so this isn't a "measured vs. target"
-honesty issue — just a documented design deviation.
-
-**Next steps, in order:**
-1. `src/models/aeromind_cnn_lstm.py` (baseline 1, no capsules)
-2. `src/models/aeromind_eegnet.py` (baseline 2, EEGNet-style)
-3. `src/models/losses.py` (margin loss + multi-task weighted sum)
-4. `src/models/registry.py` (name -> model factory, reads `ModelConfig.name`)
-5. Unit tests for all of the above (shapes, gradient flow / no-NaN backward
-   pass, parameter counts) — write `tests/test_models.py`
-6. `src/utils/checkpoint.py`, `src/models/README.md` (currently a stub),
-   `src/models/__init__.py` exports
-7. Commit Phase 5, then continue to Phase 6 (training pipeline) per the
-   phase list below.
+**Phase 5 completed this session:** `aeromind_cnn_lstm.py` (baseline 1),
+`aeromind_eegnet.py` (baseline 2, from-scratch EEGNet-style encoder),
+`losses.py` (margin loss + multi-task weighted sum, branches on whether a
+model provides `capsule_lengths`/`reconstruction`), `registry.py`
+(`build_model(model_config, data_config)`), `src/utils/checkpoint.py`,
+`src/models/__init__.py` exports, and `tests/test_models.py` (14 tests:
+capsule layer shapes, all-3-model forward passes, registry, parameter
+counts, loss values, gradient-flow/no-NaN backward pass). Full suite: 54
+tests passing. See `src/models/README.md` for measured parameter counts
+(capsnet ~460k, cnn_lstm ~215k, eegnet ~44k).
 
 **Environment note:** always use `Z:\aeromind\.venv\Scripts\python.exe`
 (or activate `.venv`) — do NOT `pip install` into the global Python
@@ -125,18 +112,18 @@ installed via `requirements-dev.txt`.
 ## Phase 5 — Model architectures (53-66)
 - [x] 53. `src/models/layers.py` — squash, PrimaryCapsule, DigitCapsule, dynamic routing
 - [x] 54. `src/models/aeromind_capsnet.py` (smoke-tested: forward pass runs, ~460k params — see session handoff note at top of this file for why that differs from README's ~720k figure)
-- [ ] 55. `src/models/aeromind_cnn_lstm.py`
-- [ ] 56. `src/models/aeromind_eegnet.py`
-- [ ] 57. `src/models/losses.py` — margin loss + multi-task weighted loss
-- [ ] 58. `src/models/registry.py` — model factory from config name
-- [ ] 59. Unit tests: capsule layers shapes
-- [ ] 60. Unit tests: forward pass all 3 models on synthetic batch
-- [ ] 61. Unit tests: loss functions
-- [ ] 62. Parameter count assertions (~720k for CapsNet)
-- [ ] 63. Gradient flow smoke test (backward pass, no NaNs)
-- [ ] 64. Model architecture docs in `src/models/README.md`
-- [ ] 65. `src/utils/checkpoint.py` — save/load checkpoints
-- [ ] 66. `src/models/__init__.py` exports
+- [x] 55. `src/models/aeromind_cnn_lstm.py`
+- [x] 56. `src/models/aeromind_eegnet.py`
+- [x] 57. `src/models/losses.py` — margin loss + multi-task weighted loss
+- [x] 58. `src/models/registry.py` — model factory from config name
+- [x] 59. Unit tests: capsule layers shapes
+- [x] 60. Unit tests: forward pass all 3 models on synthetic batch
+- [x] 61. Unit tests: loss functions
+- [x] 62. Parameter count assertions (measured values, tolerance-based — see `src/models/README.md` for the ~720k README-target vs ~460k measured discrepancy explanation)
+- [x] 63. Gradient flow smoke test (backward pass, no NaNs)
+- [x] 64. Model architecture docs in `src/models/README.md`
+- [x] 65. `src/utils/checkpoint.py` — save/load checkpoints
+- [x] 66. `src/models/__init__.py` exports
 
 ## Phase 6 — Training pipeline (67-78)
 - [ ] 67. `src/training/train.py` — CLI, AdamW, ReduceLROnPlateau
