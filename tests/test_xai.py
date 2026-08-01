@@ -8,7 +8,10 @@ import torch
 
 from src.data.synthetic import BANDS, CHANNEL_NAMES, FRONTAL_CHANNELS
 from src.models import AeroMindEEGNet
+from src.training.train import run as run_training
+from src.utils.config import AeroMindConfig, DataConfig, ModelConfig, TrainConfig
 from src.xai.counter_factual import attenuate_band, run_counter_factual_probe
+from src.xai.explain import run_explain
 from src.xai.shap_channel import compute_channel_attributions
 from src.xai.spectral_attribution import (
     build_band_power_dataset,
@@ -63,7 +66,9 @@ def test_spectral_attribution_pipeline_shapes(small_epoch_dataset):
 def test_attenuate_band_changes_signal_only_on_target_channels():
     rng = np.random.default_rng(1)
     epoch = rng.normal(size=(len(CHANNEL_NAMES), 512)).astype(np.float64)
-    attenuated = attenuate_band(epoch, sfreq=256.0, channels=FRONTAL_CHANNELS, band=BANDS["theta"], factor=0.5)
+    attenuated = attenuate_band(
+        epoch, sfreq=256.0, channels=FRONTAL_CHANNELS, band=BANDS["theta"], factor=0.5
+    )
 
     assert attenuated.shape == epoch.shape
     frontal_idx = [CHANNEL_NAMES.index(ch) for ch in FRONTAL_CHANNELS]
@@ -84,3 +89,41 @@ def test_run_counter_factual_probe_returns_valid_probabilities():
     assert np.isclose(result.original_probs.sum(), 1.0, atol=1e-4)
     assert np.isclose(result.attenuated_probs.sum(), 1.0, atol=1e-4)
     assert isinstance(result.passed, bool)
+
+
+def test_run_explain_end_to_end(tmp_path):
+    """Integration test for the explain.py CLI's `run_explain`: trains a
+    tiny checkpoint, then runs the full XAI pipeline (channel attribution +
+    topomap, spectral SHAP, counter-factual probe) against it."""
+    config = AeroMindConfig(
+        data=DataConfig(processed_dir=str(tmp_path / "no_such_dir"), sequence_length=3),
+        model=ModelConfig(name="aeromind_eegnet"),
+        train=TrainConfig(
+            protocol="subject_dependent",
+            epochs=1,
+            batch_size=4,
+            early_stop_patience=1,
+            mixed_precision=False,
+        ),
+        output_dir=str(tmp_path / "run"),
+    )
+    run_training(config, n_subjects=3, duration_s=90.0)
+    checkpoint_path = tmp_path / "run" / "subject_dependent" / "best.ckpt"
+    assert checkpoint_path.exists()
+
+    output_dir = tmp_path / "xai_out"
+    summary = run_explain(
+        checkpoint_path,
+        None,
+        subject_id=0,
+        n_subjects=3,
+        duration_s=90.0,
+        output_dir=output_dir,
+        n_background=3,
+        n_explain=2,
+    )
+
+    assert (output_dir / "xai_summary.json").exists()
+    assert (output_dir / "channel_attribution_topomap.png").exists()
+    assert len(summary["channel_attribution"]["values"]) == 2
+    assert "counter_factual_probe" in summary
