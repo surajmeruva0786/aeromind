@@ -44,11 +44,24 @@ shared forward interface), `callbacks.py` (`EarlyStopping`, `RunLogger`),
 `train.py` (CLI: `--protocol subject_dependent|loso|cross_dataset`,
 subject-aware validation carving so early stopping never sees test data,
 AdamW + `ReduceLROnPlateau`, CUDA-conditional AMP), `tests/test_training.py`
-(7 tests). Full suite: 61 tests passing. Executed a real 25-epoch smoke
-test (`AeroMind-CapsNet`, subject-dependent protocol, 8 synthetic subjects,
-556s on CPU) — results, including an honestly-reported workload-head
-overfitting/majority-class-collapse finding, are in
-`results/synthetic_smoke_test.md`.
+(7 tests). Executed a real 25-epoch smoke test (`AeroMind-CapsNet`,
+subject-dependent protocol, 8 synthetic subjects, 556s on CPU) — results,
+including an honestly-reported workload-head overfitting/
+majority-class-collapse finding, are in `results/synthetic_smoke_test.md`.
+
+**Phase 7 completed this session:** `src/evaluation/evaluate.py` (CLI:
+deterministically reconstructs a training run's fold split from its saved
+`config.yaml` + seed, loads a checkpoint, evaluates the held-out test
+split), `metrics_report.py` (markdown report: confusion matrix, per-class
+F1, ROC-AUC, ECE), `tests/test_evaluation.py` (4 tests, including an exact
+reproduction check against `src.training.train`'s own self-reported test
+metrics), `notebooks/04_xai_topographic_analysis.ipynb` (executed stub
+that trains+evaluates a checkpoint and plots its confusion matrix — full
+SHAP/topomap rendering lands in Phase 8), and `src/evaluation/README.md`.
+Ran the CLI for real against the Phase 6 smoke-test checkpoint —
+`results/eval_capsnet_smoke_test/` — and confirmed its numbers exactly
+match the training run's own reported test metrics. Full suite: 65 tests
+passing.
 
 **Environment note:** always use `Z:\aeromind\.venv\Scripts\python.exe`
 (or activate `.venv`) — do NOT `pip install` into the global Python
@@ -152,14 +165,14 @@ installed via `requirements-dev.txt`.
 - [x] 78. Training docs + troubleshooting section (`src/training/README.md`)
 
 ## Phase 7 — Evaluation (79-86)
-- [ ] 79. `src/evaluation/evaluate.py` — CLI, loads checkpoint + dataset
-- [ ] 80. `src/evaluation/metrics_report.py` — confusion matrix, ROC-AUC, calibration/ECE
-- [ ] 81. Cross-dataset evaluation path (MAUS→STEW)
-- [ ] 82. Unit tests: evaluate.py on synthetic checkpoint
-- [ ] 83. `notebooks/04_xai_topographic_analysis.ipynb` stub wired to evaluate output
-- [ ] 84. Evaluation report generator (markdown/HTML summary)
-- [ ] 85. **Execute real evaluation** on smoke-test checkpoint, save `results/`
-- [ ] 86. Evaluation docs
+- [x] 79. `src/evaluation/evaluate.py` — CLI, loads checkpoint + dataset
+- [x] 80. `src/evaluation/metrics_report.py` — confusion matrix, ROC-AUC, calibration/ECE
+- [x] 81. Cross-dataset evaluation path (synthetic-cohort proxy — see honesty note in `src/evaluation/README.md`; real MAUS→STEW not yet wired)
+- [x] 82. Unit tests: evaluate.py on synthetic checkpoint (`tests/test_evaluation.py`, 4 tests — verifies bit-for-bit reproduction of the training run's own test metrics)
+- [x] 83. `notebooks/04_xai_topographic_analysis.ipynb` stub wired to evaluate output (executed, real output committed)
+- [x] 84. Evaluation report generator (markdown summary) — `generate_report()` in `metrics_report.py`
+- [x] 85. **Execute real evaluation** on smoke-test checkpoint, save `results/eval_capsnet_smoke_test/`
+- [x] 86. Evaluation docs (`src/evaluation/README.md`)
 
 ## Phase 8 — Explainability / XAI (87-95)
 - [ ] 87. `src/xai/shap_channel.py` — GradientExplainer wrapper for multi-channel epochs

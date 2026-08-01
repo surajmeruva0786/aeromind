@@ -1,0 +1,61 @@
+{
+  "meta": {
+    "model": "aeromind_capsnet",
+    "protocol": "subject_dependent",
+    "fold": "subject_dependent",
+    "checkpoint": "runs\\synthetic_smoke_test_capsnet\\subject_dependent\\best.ckpt",
+    "n_test_sequences": 168,
+    "config_hash": "3da50b119895"
+  },
+  "loss": 0.4185464531183243,
+  "workload": {
+    "accuracy": 0.34523809523809523,
+    "macro_f1": 0.18120496061672534,
+    "kappa": 0.0016207455429498863,
+    "confusion_matrix": [
+      [
+        1,
+        67,
+        2
+      ],
+      [
+        0,
+        57,
+        1
+      ],
+      [
+        1,
+        39,
+        0
+      ]
+    ],
+    "roc_auc": 0.4465335138687696,
+    "ece": 0.0013417062305268734,
+    "per_class_f1": [
+      0.027777777777777776,
+      0.5158371040723982,
+      0.0
+    ]
+  },
+  "fatigue": {
+    "accuracy": 0.5952380952380952,
+    "macro_f1": 0.5924075924075924,
+    "kappa": 0.20401337792642138,
+    "confusion_matrix": [
+      [
+        43,
+        47
+      ],
+      [
+        21,
+        57
+      ]
+    ],
+    "roc_auc": 0.6784900284900285,
+    "ece": 0.047008324946676006,
+    "per_class_f1": [
+      0.5584415584415584,
+      0.6263736263736264
+    ]
+  }
+}
