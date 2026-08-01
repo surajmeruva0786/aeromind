@@ -20,8 +20,9 @@ matplotlib>=3.8
 seaborn>=0.13
 streamlit>=1.33
 
-# Real-time streaming (optional; guarded imports in src/inference)
-pylsl>=1.16
+# Real-time streaming
+websockets>=13.0
+pylsl>=1.16  # optional; guarded import in src/inference/lsl_source.py
 
 # Config / utils
 PyYAML>=6.0
