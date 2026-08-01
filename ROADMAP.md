@@ -60,7 +60,23 @@ that trains+evaluates a checkpoint and plots its confusion matrix — full
 SHAP/topomap rendering lands in Phase 8), and `src/evaluation/README.md`.
 Ran the CLI for real against the Phase 6 smoke-test checkpoint —
 `results/eval_capsnet_smoke_test/` — and confirmed its numbers exactly
-match the training run's own reported test metrics. Full suite: 65 tests
+match the training run's own reported test metrics.
+
+**Phase 8 completed this session:** `src/xai/shap_channel.py`
+(`shap.GradientExplainer` wrapper, per-channel attribution for each
+input's own predicted class), `topomap.py` (`mne.viz.plot_topomap` on the
+7-channel `standard_1020` montage), `spectral_attribution.py`
+(`shap.TreeExplainer` over a RandomForest trained on flattened band-power
+features — a class x (channel, band) matrix), `counter_factual.py`
+(frontal-theta attenuation probe), `explain.py` (CLI tying all of the
+above together), `tests/test_xai.py` (6 tests), and `src/xai/README.md`.
+Ran the CLI for real against the Phase 6 smoke-test checkpoint
+(`results/xai/sub-00/`, `results/xai/README.md`) — the counter-factual
+probe reported `passed: false`, which is expected and honestly documented
+given that checkpoint's known workload-head majority-class collapse
+(`results/synthetic_smoke_test.md`); the classical spectral-SHAP path
+(a separate model, unaffected by the deep checkpoint's training quality)
+did recover the expected theta-dominant signature. Full suite: 71 tests
 passing.
 
 **Environment note:** always use `Z:\aeromind\.venv\Scripts\python.exe`
@@ -175,15 +191,15 @@ installed via `requirements-dev.txt`.
 - [x] 86. Evaluation docs (`src/evaluation/README.md`)
 
 ## Phase 8 — Explainability / XAI (87-95)
-- [ ] 87. `src/xai/shap_channel.py` — GradientExplainer wrapper for multi-channel epochs
-- [ ] 88. `src/xai/topomap.py` — MNE topographic scalp map rendering
-- [ ] 89. `src/xai/spectral_attribution.py` — SHAP over band-power features
-- [ ] 90. `src/xai/counter_factual.py` — frontal-theta attenuation probe
-- [ ] 91. `src/xai/explain.py` — CLI entrypoint
-- [ ] 92. Unit tests: SHAP wrapper runs on synthetic model + batch
-- [ ] 93. Unit tests: counter-factual probe logic
-- [ ] 94. **Execute real XAI run** on smoke-test checkpoint, save sample topomap PNG to `results/xai/`
-- [ ] 95. XAI docs
+- [x] 87. `src/xai/shap_channel.py` — GradientExplainer wrapper for multi-channel epochs
+- [x] 88. `src/xai/topomap.py` — MNE topographic scalp map rendering
+- [x] 89. `src/xai/spectral_attribution.py` — SHAP over band-power features
+- [x] 90. `src/xai/counter_factual.py` — frontal-theta attenuation probe
+- [x] 91. `src/xai/explain.py` — CLI entrypoint
+- [x] 92. Unit tests: SHAP wrapper runs on synthetic model + batch
+- [x] 93. Unit tests: counter-factual probe logic
+- [x] 94. **Execute real XAI run** on smoke-test checkpoint, save sample topomap PNG to `results/xai/` (PNGs gitignored per `results/**/*.png`, regenerate via the command in `results/xai/README.md`; `xai_summary.json` and `README.md` are tracked)
+- [x] 95. XAI docs (`src/xai/README.md`)
 
 ## Phase 9 — Real-time inference (96-102)
 - [ ] 96. `src/inference/stream.py` — sliding window engine, EWMA smoothing
