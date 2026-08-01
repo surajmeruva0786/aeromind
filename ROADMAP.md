@@ -16,9 +16,18 @@ implemented, committed, and pushed individually. Checked items are done.
 > reported in this repo from an actual executed run are labeled "measured
 > (synthetic smoke test)" — the aspirational numbers in README §18 are
 > targets from literature, not claims about a specific checkpoint in this
-> repo, and are labeled as such. Docker/deployment artifacts carry their
-> own honesty notes where a step couldn't be fully verified in this
-> session's environment — see Phase 12 below.
+> repo, and are labeled as such.
+>
+> **Update (same session, post-tag)**: CI (`.github/workflows/ci.yml`) was
+> actually red on every run from the moment it was added through the
+> `v0.1.0` tag — a `ModuleNotFoundError: No module named 'src'` under the
+> bare `pytest` invocation GitHub Actions uses (works locally via
+> `python -m pytest`, which adds the repo root to `sys.path`; the bare
+> console-script entry point doesn't). This was caught by actually
+> checking the GitHub Actions run results after tagging, not assumed from
+> local green tests — see the Phase 12 addendum below for the fix and
+> verification. `docker.yml` was green from its very first run, resolving
+> the "not build-verified locally" caveat that was originally logged below.
 
 ## Session handoff (2026-08-01, resumed and continuing through Phase 12)
 
@@ -147,14 +156,39 @@ path added, Project Structure section brought up to date), and
 
 **Honesty note carried into the release**: the Dockerfile was not
 build-verified locally (no reachable Docker daemon in this session's
-environment) — `.github/workflows/docker.yml`'s first run against it on
-GitHub Actions is its real first build check; verify that run before
-depending on the image for anything beyond casual local use. Everything
-else in this repo (86 tests, every CLI, the Streamlit app, the training/
-evaluation/XAI/inference pipelines) was executed for real at least once
-during this build, with measured results recorded under `results/` and
-distinguished throughout from the literature-target numbers in
-`README.md` §18.
+environment). Everything else in this repo (86 tests, every CLI, the
+Streamlit app, the training/evaluation/XAI/inference pipelines) was
+executed for real at least once during this build, with measured results
+recorded under `results/` and distinguished throughout from the
+literature-target numbers in `README.md` §18.
+
+**Post-tag addendum (same session): CI was actually red, caught and
+fixed.** After tagging `v0.1.0`, actually checking the GitHub Actions run
+results (rather than assuming green from local test runs) showed `CI` had
+failed on every single run since Phase 11 — `docker.yml` was green
+throughout, resolving the Dockerfile honesty note above, but `ci.yml`'s
+"Test with coverage" step failed with `ModuleNotFoundError: No module
+named 'src'`. Root cause: the workflow invokes the bare `pytest`
+console-script entry point; locally this project was always run via
+`python -m pytest` (which adds the repo root to `sys.path`) or with
+`aeromind` `pip install -e .`'d into the dev `.venv` from an earlier
+session — CI did neither. Reproduced the exact failure locally in a
+from-scratch venv built from `requirements.txt`+`requirements-dev.txt`
+only (this also surfaced that `requirements.txt`'s open-ended `>=`
+pins resolve to much newer packages today — torch 2.13, pandas 3.0,
+numpy 2.4 — than what's in this repo's long-lived dev `.venv`; all 86
+tests passed against those newer versions too, so no compatibility fix
+was needed there, but it's worth knowing the floor pins are exercising a
+different, newer dependency surface than local dev). Fix: added
+`pythonpath = ["."]` to `[tool.pytest.ini_options]` in `pyproject.toml`
+— the standard, invocation-agnostic pytest solution, verified against a
+second from-scratch venv with the package deliberately *not* installed.
+Pushed as commit `4ca4e1b`; **confirmed green** on both `ci.yml` and
+`docker.yml` via the GitHub Actions API afterward. Lesson for next time:
+verify a CI workflow's actual run result after adding it, don't just
+trust that a locally-green test suite implies a locally-configured CI
+workflow is correct too — they can silently diverge on exactly this kind
+of invocation/environment detail.
 
 **Environment note:** always use `Z:\aeromind\.venv\Scripts\python.exe`
 (or activate `.venv`) — do NOT `pip install` into the global Python
@@ -298,13 +332,13 @@ installed via `requirements-dev.txt`.
 ## Phase 11 — Tests, CI, quality (109-114)
 - [x] 109. `pytest.ini` / test config, `tests/conftest.py` fixtures (test config lives in `pyproject.toml`'s `[tool.pytest.ini_options]`, already in place since Phase 0; fixtures already in `tests/conftest.py` since Phase 2 — this step formalizes/documents both, see `CONTRIBUTING.md`)
 - [x] 110. Full test suite run — fix failures (ran `ruff --fix` + `black` across `src/app/tests/scripts`, normalizing formatting that had drifted since earlier phases; one intermittent, non-reproducible failure was investigated across ~10 repeat runs and could not be reproduced with a root cause — see note below)
-- [x] 111. `.github/workflows/ci.yml` — lint + test on push
-- [x] 112. `.github/workflows/docker.yml` — build check (gracefully no-ops if `Dockerfile` isn't present yet — see Phase 12)
+- [x] 111. `.github/workflows/ci.yml` — lint + test on push (initially broken — see the Phase 12 addendum below for the `ModuleNotFoundError` fix and confirmed-green re-run)
+- [x] 112. `.github/workflows/docker.yml` — build check (gracefully no-ops if `Dockerfile` isn't present yet — see Phase 12; confirmed green on every run once `Dockerfile` landed)
 - [x] 113. Pre-commit config (ruff/black) — `.pre-commit-config.yaml`, verified clean via `pre-commit run --all-files`
 - [x] 114. Coverage report + badge — measured 86% (`pytest --cov=src --cov=app`), static badge in `README.md`
 
 ## Phase 12 — Packaging & deployment (115-120)
-- [x] 115. `Dockerfile` (CPU) + `.dockerignore` — **not build-verified in this session** (no reachable Docker daemon in this sandboxed environment; see honesty note in `DEPLOYMENT.md` — `.github/workflows/docker.yml`'s first real run on GitHub Actions is this Dockerfile's actual first build verification)
+- [x] 115. `Dockerfile` (CPU) + `.dockerignore` — not build-verified locally (no reachable Docker daemon in this sandboxed environment), **but confirmed building successfully on GitHub Actions** (`.github/workflows/docker.yml`, green on every run since it landed) — see the DEPLOYMENT.md honesty note, now updated to reflect this
 - [x] 116. `docker-compose.yml` for local stack
 - [x] 117. Streamlit Community Cloud deployment config (`runtime.txt`, `.streamlit/config.toml`, `.streamlit/secrets.toml.example`)
 - [x] 118. `DEPLOYMENT.md` — deploy instructions (Docker, Streamlit Cloud, HF Spaces)

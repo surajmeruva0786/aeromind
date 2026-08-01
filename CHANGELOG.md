@@ -79,10 +79,22 @@ recorded under `results/`.
 - The `cross_dataset` training/evaluation protocol uses a second synthetic
   cohort as a structural stand-in for genuine cross-dataset (MAUS→STEW)
   transfer.
-- Docker image build was not verified in this session's execution
-  environment (no reachable Docker daemon); the Dockerfile follows
-  standard, previously-tested patterns but should be build-verified before
-  a production deployment.
+- Docker image build was not verified locally (no reachable Docker daemon
+  in this session's execution environment) — it **has** since been
+  verified via `.github/workflows/docker.yml` actually passing on GitHub
+  Actions (checked via the API, not assumed).
 - Live LSL hardware streaming and real `.edf`/`.bdf`/`.fif` replay are
   implemented but untested against real hardware/files, for lack of
   access to either in this environment.
+
+## [v0.1.0 post-tag fix] — 2026-08-01
+
+`ci.yml` was red on every run since Phase 11 (`ModuleNotFoundError: No
+module named 'src'` under the bare `pytest` CI invokes, which — unlike
+local `python -m pytest` runs — doesn't add the repo root to `sys.path`).
+Caught by checking actual GitHub Actions run results after the `v0.1.0`
+tag rather than assuming local green tests implied CI was green too.
+Fixed with `pythonpath = ["."]` in `pyproject.toml`'s
+`[tool.pytest.ini_options]`; confirmed green on both `ci.yml` and
+`docker.yml` afterward. See `ROADMAP.md`'s Phase 12 addendum for the full
+investigation.

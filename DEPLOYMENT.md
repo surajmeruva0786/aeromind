@@ -34,13 +34,13 @@ before `pip install -r requirements.txt` in a customized image.
 **Build-health CI**: `.github/workflows/docker.yml` builds this image
 (without pushing anywhere) on every push/PR, catching Dockerfile
 breakage before it reaches a release. Honesty note: the Dockerfile
-authored here could **not** be build-verified in the sandboxed
-environment it was written in (no reachable Docker daemon locally) — it
-follows standard, previously-proven patterns (CPU-only torch wheel via
-`--index-url`, slim base image, editable install), but treat the very
-first GitHub Actions run of `docker.yml` after this file lands as its
-actual first build verification, and check that run before relying on
-this image in production.
+authored here could **not** be build-verified locally (no reachable
+Docker daemon in that sandboxed environment) — but `.github/workflows/docker.yml`
+**has now run and passed on GitHub Actions**, confirming the image
+actually builds; this was verified by checking the real run result via
+the GitHub API, not assumed. See `ROADMAP.md`'s Phase 12 addendum for
+the full story (a separate, real bug in `ci.yml` — unrelated to Docker —
+was also caught and fixed the same way).
 
 **Running other CLIs in the container**: the entrypoint launches
 Streamlit by default, but the image has the full repo installed — override
