@@ -34,9 +34,21 @@ model provides `capsule_lengths`/`reconstruction`), `registry.py`
 (`build_model(model_config, data_config)`), `src/utils/checkpoint.py`,
 `src/models/__init__.py` exports, and `tests/test_models.py` (14 tests:
 capsule layer shapes, all-3-model forward passes, registry, parameter
-counts, loss values, gradient-flow/no-NaN backward pass). Full suite: 54
-tests passing. See `src/models/README.md` for measured parameter counts
-(capsnet ~460k, cnn_lstm ~215k, eegnet ~44k).
+counts, loss values, gradient-flow/no-NaN backward pass). See
+`src/models/README.md` for measured parameter counts (capsnet ~460k,
+cnn_lstm ~215k, eegnet ~44k).
+
+**Phase 6 completed this session:** `src/training/loop.py`
+(`train_one_epoch`/`evaluate_epoch`, works across all 3 models via the
+shared forward interface), `callbacks.py` (`EarlyStopping`, `RunLogger`),
+`train.py` (CLI: `--protocol subject_dependent|loso|cross_dataset`,
+subject-aware validation carving so early stopping never sees test data,
+AdamW + `ReduceLROnPlateau`, CUDA-conditional AMP), `tests/test_training.py`
+(7 tests). Full suite: 61 tests passing. Executed a real 25-epoch smoke
+test (`AeroMind-CapsNet`, subject-dependent protocol, 8 synthetic subjects,
+556s on CPU) — results, including an honestly-reported workload-head
+overfitting/majority-class-collapse finding, are in
+`results/synthetic_smoke_test.md`.
 
 **Environment note:** always use `Z:\aeromind\.venv\Scripts\python.exe`
 (or activate `.venv`) — do NOT `pip install` into the global Python
@@ -126,18 +138,18 @@ installed via `requirements-dev.txt`.
 - [x] 66. `src/models/__init__.py` exports
 
 ## Phase 6 — Training pipeline (67-78)
-- [ ] 67. `src/training/train.py` — CLI, AdamW, ReduceLROnPlateau
-- [ ] 68. `src/training/loop.py` — train/val epoch loops, early stopping
-- [ ] 69. `src/training/callbacks.py` — checkpointing, logging, early stop
-- [ ] 70. Mixed precision support (fp16, CUDA-conditional)
-- [ ] 71. LOSO training orchestration (`--protocol loso`)
-- [ ] 72. Subject-dependent training orchestration
-- [ ] 73. Cross-dataset training orchestration
-- [ ] 74. Run-config hashing + logging (`runs/<name>/config.yaml`, `metrics.json`)
-- [ ] 75. Unit tests: training loop runs 1 epoch on synthetic data, loss decreases sanity check
-- [ ] 76. **Execute real smoke-test training run** on synthetic dataset (few epochs, log actual metrics)
-- [ ] 77. Record measured smoke-test results in `results/synthetic_smoke_test.md`
-- [ ] 78. Training docs + troubleshooting section
+- [x] 67. `src/training/train.py` — CLI, AdamW, ReduceLROnPlateau
+- [x] 68. `src/training/loop.py` — train/val epoch loops, early stopping
+- [x] 69. `src/training/callbacks.py` — checkpointing, logging, early stop
+- [x] 70. Mixed precision support (fp16, CUDA-conditional — inert on this CPU-only dev machine, gated on `device.type == "cuda"`)
+- [x] 71. LOSO training orchestration (`--protocol loso`)
+- [x] 72. Subject-dependent training orchestration
+- [x] 73. Cross-dataset training orchestration (synthetic-cohort proxy — see honesty note in `src/training/README.md`; real MAUS/STEW cross-dataset ingestion is not yet wired)
+- [x] 74. Run-config hashing + logging (`runs/<name>/config.yaml`, `metrics.json`)
+- [x] 75. Unit tests: training loop runs on synthetic data, loss decreases sanity check (`tests/test_training.py`, 7 tests)
+- [x] 76. **Execute real smoke-test training run** on synthetic dataset (25 epochs, AeroMind-CapsNet, 556s wall-clock on CPU)
+- [x] 77. Record measured smoke-test results in `results/synthetic_smoke_test.md`
+- [x] 78. Training docs + troubleshooting section (`src/training/README.md`)
 
 ## Phase 7 — Evaluation (79-86)
 - [ ] 79. `src/evaluation/evaluate.py` — CLI, loads checkpoint + dataset
