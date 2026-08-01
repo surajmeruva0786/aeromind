@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import matplotlib
+
+matplotlib.use("Agg")  # headless-safe backend for CI and any XAI plotting tests
+
 import pytest
 
 from src.data.synthetic import generate_dataset
