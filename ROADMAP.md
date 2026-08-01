@@ -1,5 +1,7 @@
 # AeroMind Build Roadmap
 
+**Status: COMPLETE — all 120 steps done, tagged `v0.1.0`.**
+
 This file tracks the step-by-step build-out of AeroMind from the architecture
 described in `README.md` to a working, deployable system. Each step is
 implemented, committed, and pushed individually. Checked items are done.
@@ -8,10 +10,15 @@ implemented, committed, and pushed individually. Checked items are done.
 > end-to-end with a synthetic EEG generator (`src/data/synthetic.py`) so every
 > module is runnable without GPU hardware or gated dataset access. Real
 > dataset download scripts are wired up where the data is genuinely open
-> (MAUS). Any accuracy numbers reported in this repo from an actual executed
-> run are labeled "measured (synthetic smoke test)" or "measured (MAUS)" —
-> the aspirational numbers in the README §18 are targets from literature, not
-> claims about a specific checkpoint in this repo, and are labeled as such.
+> (STEW, via an automated Hugging Face path — MAUS turned out to be IEEE
+> DataPort ECG/PPG/GSR, not open EEG, and is reference-only; see the Phase
+> 0-4 session handoff below for that correction). Any accuracy numbers
+> reported in this repo from an actual executed run are labeled "measured
+> (synthetic smoke test)" — the aspirational numbers in README §18 are
+> targets from literature, not claims about a specific checkpoint in this
+> repo, and are labeled as such. Docker/deployment artifacts carry their
+> own honesty notes where a step couldn't be fully verified in this
+> session's environment — see Phase 12 below.
 
 ## Session handoff (2026-08-01, resumed and continuing through Phase 12)
 
@@ -124,6 +131,30 @@ their code path, so the failure was not reproducible despite ~10 repeated
 full-suite and targeted re-runs afterward. Logged here rather than
 silently ignored — if it recurs, the fully-seeded/deterministic design
 argument above should be re-examined, not assumed to still hold.
+
+**Phase 12 completed this session — project complete (all 120 steps):**
+`Dockerfile` (CPU-only, explicit `--index-url .../whl/cpu` torch install)
++ `.dockerignore`, `docker-compose.yml`, Streamlit Community Cloud config
+(`runtime.txt`, `.streamlit/config.toml`, `.streamlit/secrets.toml.example`
+— the app needs no secrets in its default mode), `DEPLOYMENT.md` (Docker /
+Streamlit Community Cloud / Hugging Face Spaces, each with an honest
+resource/verification note), a full README sync (real repo URL and
+contact info in place of placeholders, §16 usage examples corrected to
+match actual implemented CLI flags rather than aspirational ones, §18
+Results links to every `results/` measured-output doc, Docker install
+path added, Project Structure section brought up to date), and
+`CHANGELOG.md`. Tagged `v0.1.0`.
+
+**Honesty note carried into the release**: the Dockerfile was not
+build-verified locally (no reachable Docker daemon in this session's
+environment) — `.github/workflows/docker.yml`'s first run against it on
+GitHub Actions is its real first build check; verify that run before
+depending on the image for anything beyond casual local use. Everything
+else in this repo (86 tests, every CLI, the Streamlit app, the training/
+evaluation/XAI/inference pipelines) was executed for real at least once
+during this build, with measured results recorded under `results/` and
+distinguished throughout from the literature-target numbers in
+`README.md` §18.
 
 **Environment note:** always use `Z:\aeromind\.venv\Scripts\python.exe`
 (or activate `.venv`) — do NOT `pip install` into the global Python
@@ -273,12 +304,12 @@ installed via `requirements-dev.txt`.
 - [x] 114. Coverage report + badge — measured 86% (`pytest --cov=src --cov=app`), static badge in `README.md`
 
 ## Phase 12 — Packaging & deployment (115-120)
-- [ ] 115. `Dockerfile` (CPU) + `.dockerignore`
-- [ ] 116. `docker-compose.yml` for local stack
-- [ ] 117. Streamlit Community Cloud deployment config (`app` entrypoint, `runtime.txt`, secrets template)
-- [ ] 118. `DEPLOYMENT.md` — deploy instructions (Docker, Streamlit Cloud, HF Spaces)
-- [ ] 119. Final README sync (fill placeholders, link measured results, badges)
-- [ ] 120. Tag release `v0.1.0`, final CHANGELOG entry
+- [x] 115. `Dockerfile` (CPU) + `.dockerignore` — **not build-verified in this session** (no reachable Docker daemon in this sandboxed environment; see honesty note in `DEPLOYMENT.md` — `.github/workflows/docker.yml`'s first real run on GitHub Actions is this Dockerfile's actual first build verification)
+- [x] 116. `docker-compose.yml` for local stack
+- [x] 117. Streamlit Community Cloud deployment config (`runtime.txt`, `.streamlit/config.toml`, `.streamlit/secrets.toml.example`)
+- [x] 118. `DEPLOYMENT.md` — deploy instructions (Docker, Streamlit Cloud, HF Spaces)
+- [x] 119. Final README sync (fixed placeholder repo URL/author/contact, corrected §16 usage examples to match actual CLI flags, added Docker install path, linked measured results in §18, CI+coverage badges from Phase 11)
+- [x] 120. Tag release `v0.1.0`, final `CHANGELOG.md` entry
 
 ---
 **Status legend**: unchecked = pending, this file is updated and committed as each step completes.

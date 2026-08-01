@@ -397,16 +397,19 @@ This is the artifact intended for live demonstration to DIPAS / DRDO scientists.
 ### Prerequisites
 
 - Python 3.11
-- CUDA 12.1 (optional, GPU strongly recommended)
+- CUDA 12.1 (optional — **not required**; every measured benchmark in this
+  repo, including the latency benchmark, runs CPU-only, see
+  `results/latency_benchmark.json`)
 - 16 GB RAM
-- 25 GB free disk
+- 25 GB free disk (only if downloading real datasets; the synthetic path
+  needs a few hundred MB)
 
 ### Setup
 
 ```bash
 # 1. Clone
-git clone https://github.com/<your-username>/AeroMind.git
-cd AeroMind
+git clone https://github.com/surajmeruva0786/aeromind.git
+cd aeromind
 
 # 2. Conda environment
 conda create -n aeromind python=3.11 -y
@@ -415,157 +418,170 @@ conda activate aeromind
 # 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. Download datasets
-python scripts/download_maus.py
-python scripts/download_stew.py
+# 4. (optional) Download real datasets — the synthetic generator
+#    (src/data/synthetic.py) works with zero setup and needs none of this
+python scripts/download_stew.py       # real EEG, automated HF download path
+python scripts/download_maus.py       # reference-only: MAUS is ECG/PPG/GSR, not EEG
 # DEAP requires manual registration — see data/README.md
 ```
 
+### Docker (alternative to steps 2-3)
+
+```bash
+docker build -t aeromind .
+docker run -p 8501:8501 aeromind
+```
+
+See `DEPLOYMENT.md` for Docker Compose, Streamlit Community Cloud, and
+Hugging Face Spaces deployment instructions.
+
 ### Key Dependencies
 
+Pinned as version *floors* in `requirements.txt` (`>=`, not `==`) so the
+project tracks compatible upstream patches; versions below are what's
+actually installed and tested against in this repo's `.venv` as of the
+last session:
+
 ```
-torch==2.2.0
-mne==1.6.1
-mne-icalabel==0.6.0
-numpy==1.26.4
-scipy==1.12.0
-scikit-learn==1.5.0
-pandas==2.2.1
-shap==0.45.0
-matplotlib==3.8.3
-seaborn==0.13.2
-streamlit==1.33.0
-pylsl==1.16.2
-pyEDFlib==0.1.36
+torch>=2.2        (tested: 2.2.x, CPU build)
+mne>=1.6           (tested: 1.12.1)
+mne-icalabel>=0.6
+numpy>=1.26,<3.0
+scipy>=1.12
+scikit-learn>=1.5
+pandas>=2.2
+shap>=0.45          (tested: 0.51.0)
+matplotlib>=3.8
+seaborn>=0.13
+streamlit>=1.33      (tested: 1.60.0)
+websockets>=13.0
+pylsl>=1.16          (optional; guarded import — see src/inference/lsl_source.py)
+pyEDFlib>=0.1.36
 ```
 
 ---
 
 ## 16. Usage
 
+The examples below are the **actual commands used** to produce the
+measured results in `results/` (see §18) — copy-pasteable, not
+illustrative pseudo-CLI. All run against the zero-setup synthetic
+dataset; see `data/README.md` for real-dataset (STEW) preprocessing.
+
 ### Preprocess a dataset
 
 ```bash
 python -m src.preprocessing.run \
-    --dataset maus \
-    --input_dir data/raw/maus \
-    --output_dir data/processed/maus \
-    --sfreq 256 \
-    --window 2.0 \
-    --overlap 0.5
+    --dataset synthetic \
+    --output_dir data/processed/synthetic_preprocessed \
+    --sfreq 256 --window 2.0 --overlap 0.5
 ```
 
 ### Train AeroMind-CapsNet
 
 ```bash
 python -m src.training.train \
-    --model aeromind_capsnet \
-    --dataset maus \
-    --protocol loso \
-    --epochs 150 \
-    --batch_size 64 \
-    --output_dir runs/capsnet_maus_loso
+    --model aeromind_capsnet --protocol subject_dependent \
+    --epochs 25 --n_subjects 8 --duration_s 180 --sequence_length 15 --batch_size 32 \
+    --seed 42 --output_dir runs/synthetic_smoke_test_capsnet
 ```
 
-### Evaluate on STEW (cross-dataset)
+`--protocol loso` and `--protocol cross_dataset` are also available — see
+`src/training/README.md` for the full protocol/orchestration details and
+the cross-dataset honesty note.
+
+### Evaluate a checkpoint
 
 ```bash
 python -m src.evaluation.evaluate \
-    --checkpoint runs/capsnet_maus_loso/best.ckpt \
-    --dataset stew \
-    --output_dir results/cross_dataset
+    --checkpoint runs/synthetic_smoke_test_capsnet/subject_dependent/best.ckpt \
+    --fold subject_dependent --n_subjects 8 --duration_s 180 \
+    --output_dir results/eval_capsnet_smoke_test
 ```
 
-### Generate XAI report for one subject
+### Generate an XAI report for one subject
 
 ```bash
 python -m src.xai.explain \
-    --checkpoint runs/capsnet_maus_loso/best.ckpt \
-    --subject_file data/processed/maus/sub-005.fif \
-    --output_dir results/xai/sub-005
+    --checkpoint runs/synthetic_smoke_test_capsnet/subject_dependent/best.ckpt \
+    --n_subjects 8 --duration_s 180 --subject_id 0 \
+    --output_dir results/xai/sub-00
 ```
 
 ### Launch live dashboard
 
 ```bash
-# Replay mode (offline EDF)
-streamlit run app/streamlit_app.py -- \
-    --source replay \
-    --file data/processed/maus/sub-005.fif
-
-# Live mode (LSL stream from EEG hardware)
-streamlit run app/streamlit_app.py -- --source lsl
+streamlit run app/streamlit_app.py
 ```
+
+Replay source (synthetic / uploaded `.edf`/`.bdf`/`.fif`), model, and
+checkpoint path are chosen from the sidebar UI, not CLI flags — see
+`app/README.md`. Live LSL hardware streaming is implemented at the
+library level (`src/inference/lsl_source.py`) but not yet wired into the
+app's sidebar as a selectable source.
 
 ---
 
 ## 17. Project Structure
 
 ```
-AeroMind/
+aeromind/
 ├── app/
-│   └── streamlit_app.py
+│   ├── streamlit_app.py           # Phase 10 demo dashboard
+│   └── README.md
 ├── configs/
 │   ├── aeromind_capsnet.yaml
 │   ├── aeromind_cnn_lstm.yaml
 │   └── aeromind_eegnet.yaml
 ├── data/
 │   ├── raw/                       # gitignored
-│   ├── processed/
-│   └── README.md                  # dataset download instructions
+│   ├── processed/                 # gitignored
+│   └── README.md                  # dataset access instructions
 ├── notebooks/
 │   ├── 01_dataset_eda.ipynb
 │   ├── 02_preprocessing_demo.ipynb
 │   ├── 03_feature_visualisation.ipynb
 │   └── 04_xai_topographic_analysis.ipynb
-├── runs/                          # gitignored
-├── results/
+├── runs/                          # gitignored (checkpoints, per-run logs)
+├── results/                       # measured run summaries (see §18)
 ├── scripts/
-│   ├── download_maus.py
-│   ├── download_stew.py
+│   ├── download_maus.py / download_stew.py / download_deap.py
+│   ├── make_synthetic_dataset.py
+│   ├── benchmark_latency.py
 │   └── verify_environment.py
 ├── src/
-│   ├── data/
-│   │   ├── dataset.py
-│   │   └── transforms.py
-│   ├── preprocessing/
-│   │   ├── run.py
-│   │   ├── prep_pipeline.py
-│   │   └── ica_artefact.py
-│   ├── features/
-│   │   ├── spectral.py
-│   │   ├── temporal.py
-│   │   └── connectivity.py
-│   ├── models/
-│   │   ├── aeromind_capsnet.py
-│   │   ├── aeromind_cnn_lstm.py
-│   │   ├── aeromind_eegnet.py
-│   │   └── layers.py
-│   ├── training/
-│   │   └── train.py
-│   ├── evaluation/
-│   │   └── evaluate.py
-│   ├── inference/
-│   │   └── stream.py
-│   ├── xai/
-│   │   ├── shap_channel.py
-│   │   ├── topomap.py
-│   │   └── counter_factual.py
-│   └── utils/
-│       ├── seed.py
-│       └── metrics.py
-├── tests/
+│   ├── data/            # synthetic.py, dataset.py, transforms.py, splits.py
+│   ├── preprocessing/   # filters, PREP pipeline, ICA, epoching, run.py CLI
+│   ├── features/        # spectral, temporal, connectivity, pipeline
+│   ├── models/           # capsnet, cnn_lstm, eegnet, layers, losses, registry
+│   ├── training/         # loop.py, callbacks.py, train.py CLI
+│   ├── evaluation/       # evaluate.py CLI, metrics_report.py, baseline.py
+│   ├── inference/        # stream.py, replay.py, lsl_source.py, websocket_server.py
+│   ├── xai/               # shap_channel, topomap, spectral_attribution, counter_factual, explain.py CLI
+│   └── utils/             # seed, logging, metrics, config, checkpoint
+├── tests/                 # 86 tests, ~86% coverage (see ROADMAP.md Phase 11)
+├── .github/workflows/     # ci.yml, docker.yml
+├── .streamlit/            # config.toml, secrets.toml.example
+├── .dockerignore
 ├── .gitignore
+├── .pre-commit-config.yaml
+├── CONTRIBUTING.md
+├── DEPLOYMENT.md
+├── Dockerfile
+├── docker-compose.yml
 ├── LICENSE
 ├── README.md
-└── requirements.txt
+├── ROADMAP.md              # phase-by-phase build log with measured-result links
+├── requirements.txt / requirements-dev.txt
+├── runtime.txt
+└── pyproject.toml
 ```
 
 ---
 
 ## 18. Results
 
-> *Numbers below are target benchmarks consistent with published results on MAUS and STEW. Replace with your measured values after training.*
+> *Numbers below are target benchmarks consistent with published results on MAUS and STEW — literature targets, not claims about a specific checkpoint in this repo.* **Measured (synthetic smoke test)** numbers from an actually-executed run are in `results/synthetic_smoke_test.md` (training), `results/eval_capsnet_smoke_test/` (evaluation CLI), `results/xai/` (explainability), and `results/latency_benchmark.json` (real-time inference) — see the honesty note at the top of `ROADMAP.md` for why these two categories of numbers are kept separate.
 
 ### Subject-Independent (LOSO) on MAUS — Workload (3-class)
 
@@ -643,9 +659,9 @@ A measurable drop in the cross-dataset condition is expected and is itself a use
 ```bibtex
 @misc{aeromind2026,
   title  = {AeroMind: EEG-Based Cognitive Fatigue and Mental Workload Detection},
-  author = {<Your Name>},
+  author = {Meruva, Suraj},
   year   = {2026},
-  howpublished = {\url{https://github.com/<your-username>/AeroMind}}
+  howpublished = {\url{https://github.com/surajmeruva0786/aeromind}}
 }
 ```
 
@@ -669,10 +685,9 @@ Datasets remain the property of their original publishers and are governed by th
 
 ## 27. Contact
 
-**<Your Name>**
+**Suraj Meruva**
 B.Tech., Indian Institute of Information Technology, Naya Raipur
-Email: `<your.email@iiitnr.edu.in>`
-GitHub: [@<your-username>](https://github.com/<your-username>)
-LinkedIn: [linkedin.com/in/<your-username>](https://linkedin.com/in/<your-username>)
+Email: `meruva24102@iiitnr.edu.in`
+GitHub: [@surajmeruva0786](https://github.com/surajmeruva0786)
 
 For research discussions, internship inquiries, or collaboration opportunities, please reach out via email.
