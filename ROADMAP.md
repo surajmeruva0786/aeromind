@@ -88,7 +88,20 @@ real WebSocket round-trip), and `src/inference/README.md`. Ran
 `scripts/benchmark_latency.py` for real on this CPU-only machine — all
 three models comfortably clear the 500ms (0.5s hop) real-time budget:
 CapsNet p95 16ms, CNN-LSTM p95 11ms, EEGNet p95 7ms
-(`results/latency_benchmark.json`). Full suite: 79 tests passing.
+(`results/latency_benchmark.json`).
+
+**Phase 10 completed this session:** `app/streamlit_app.py` — a live EEG
+plot, EWMA-smoothed workload/fatigue panels, an on-demand SHAP topomap
+button, and CSV session export, driven by `StreamingEngine` +
+`src.inference.replay`. Zero-setup by default (synthetic source); with no
+checkpoint given it runs on a freshly initialized model and shows a
+persistent "untrained model" warning rather than silently presenting
+demo output as real. All `st.*` calls are inside `main()` so `import
+app.streamlit_app` never touches the Streamlit runtime.
+`tests/test_app.py` (5 tests) uses `streamlit.testing.v1.AppTest` to
+actually render the app and click controls headlessly; also manually
+verified with a real `streamlit run` server. `app/README.md` documents
+usage. Full suite: 84 tests passing.
 
 **Environment note:** always use `Z:\aeromind\.venv\Scripts\python.exe`
 (or activate `.venv`) — do NOT `pip install` into the global Python
@@ -222,12 +235,12 @@ installed via `requirements-dev.txt`.
 - [x] 102. Inference docs (`src/inference/README.md`)
 
 ## Phase 10 — Streamlit demo app (103-108)
-- [ ] 103. `app/streamlit_app.py` — live EEG plot, probability bars, fatigue indicator
-- [ ] 104. Scalp topomap panel wired to `src/xai`
-- [ ] 105. Session CSV export
-- [ ] 106. Replay-mode wiring to synthetic/sample data (works with zero setup)
-- [ ] 107. App smoke test (headless import / syntax check)
-- [ ] 108. App usage docs
+- [x] 103. `app/streamlit_app.py` — live EEG plot, probability bars, fatigue indicator
+- [x] 104. Scalp topomap panel wired to `src/xai` (on-demand button, not per-frame — `shap.GradientExplainer` is too expensive to run every refresh tick)
+- [x] 105. Session CSV export
+- [x] 106. Replay-mode wiring to synthetic/sample data (works with zero setup)
+- [x] 107. App smoke test (headless import / syntax check) — `tests/test_app.py` (5 tests, using `streamlit.testing.v1.AppTest`); also manually verified with a real `streamlit run` server (HTTP 200)
+- [x] 108. App usage docs (`app/README.md`)
 
 ## Phase 11 — Tests, CI, quality (109-114)
 - [ ] 109. `pytest.ini` / test config, `tests/conftest.py` fixtures
