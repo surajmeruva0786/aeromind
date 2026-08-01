@@ -27,7 +27,14 @@ from src.utils.logging_utils import get_logger
 logger = get_logger(__name__)
 
 
-def benchmark_model(model_name: str, duration_s: float, sequence_length: int, window_s: float, hop_s: float, sfreq: float) -> dict:
+def benchmark_model(
+    model_name: str,
+    duration_s: float,
+    sequence_length: int,
+    window_s: float,
+    hop_s: float,
+    sfreq: float,
+) -> dict:
     data_config = DataConfig(sfreq=sfreq, epoch_seconds=window_s, sequence_length=sequence_length)
     model = build_model(ModelConfig(name=model_name), data_config)
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -42,7 +49,9 @@ def benchmark_model(model_name: str, duration_s: float, sequence_length: int, wi
     )
 
     latencies_ms: list[float] = []
-    for sample, t in replay_synthetic(subject_id=0, duration_s=duration_s, sfreq=sfreq, realtime=False):
+    for sample, t in replay_synthetic(
+        subject_id=0, duration_s=duration_s, sfreq=sfreq, realtime=False
+    ):
         start = time.perf_counter()
         event = engine.push_sample(sample, t)
         elapsed_ms = (time.perf_counter() - start) * 1000.0
@@ -67,7 +76,9 @@ def benchmark_model(model_name: str, duration_s: float, sequence_length: int, wi
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--models", nargs="+", default=["aeromind_capsnet", "aeromind_cnn_lstm", "aeromind_eegnet"])
+    parser.add_argument(
+        "--models", nargs="+", default=["aeromind_capsnet", "aeromind_cnn_lstm", "aeromind_eegnet"]
+    )
     parser.add_argument("--duration_s", type=float, default=120.0)
     parser.add_argument("--sequence_length", type=int, default=15)
     parser.add_argument("--window_s", type=float, default=2.0)
@@ -79,9 +90,17 @@ def main() -> int:
     results = []
     for model_name in args.models:
         logger.info("Benchmarking %s...", model_name)
-        result = benchmark_model(model_name, args.duration_s, args.sequence_length, args.window_s, args.hop_s, args.sfreq)
+        result = benchmark_model(
+            model_name, args.duration_s, args.sequence_length, args.window_s, args.hop_s, args.sfreq
+        )
         results.append(result)
-        logger.info("%s: p50=%.1fms p95=%.1fms (budget=%.0fms)", model_name, result["p50_ms"], result["p95_ms"], result["realtime_budget_ms"])
+        logger.info(
+            "%s: p50=%.1fms p95=%.1fms (budget=%.0fms)",
+            model_name,
+            result["p50_ms"],
+            result["p95_ms"],
+            result["realtime_budget_ms"],
+        )
 
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)

@@ -120,7 +120,9 @@ class StreamingEngine:
         if len(self.epoch_sequence) < self.sequence_length:
             return None  # not enough context for the Bi-LSTM window yet
 
-        x = torch.from_numpy(np.stack(self.epoch_sequence, axis=0)).unsqueeze(0).to(self.device)  # (1, L, C, T)
+        x = (
+            torch.from_numpy(np.stack(self.epoch_sequence, axis=0)).unsqueeze(0).to(self.device)
+        )  # (1, L, C, T)
         out = self.model(x)
         workload_probs = torch.softmax(out["workload_logits"], dim=-1)[0].cpu().numpy()
         fatigue_probs = torch.softmax(out["fatigue_logits"], dim=-1)[0].cpu().numpy()

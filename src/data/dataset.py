@@ -39,8 +39,10 @@ class EpochWindowDataset(Dataset):
         ep = self.epochs[idx]
         data = _zscore(ep.data) if self.normalize else ep.data
         x = torch.from_numpy(data.astype(np.float32))
-        return x, torch.tensor(ep.workload, dtype=torch.long), torch.tensor(
-            ep.fatigue, dtype=torch.long
+        return (
+            x,
+            torch.tensor(ep.workload, dtype=torch.long),
+            torch.tensor(ep.fatigue, dtype=torch.long),
         )
 
 
@@ -78,6 +80,8 @@ class SequenceEpochDataset(Dataset):
             frames.append(data.astype(np.float32))
         x = torch.from_numpy(np.stack(frames, axis=0))  # (L, C, T)
         last = seq[-1]
-        return x, torch.tensor(last.workload, dtype=torch.long), torch.tensor(
-            last.fatigue, dtype=torch.long
+        return (
+            x,
+            torch.tensor(last.workload, dtype=torch.long),
+            torch.tensor(last.fatigue, dtype=torch.long),
         )

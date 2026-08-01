@@ -67,10 +67,19 @@ def test_run_logger_writes_metrics_json(tmp_path):
 
 def test_get_protocol_splits_subject_dependent_and_loso(multi_subject_epoch_dataset):
     data_cfg = DataConfig()
-    sd_splits = get_protocol_splits("subject_dependent", multi_subject_epoch_dataset, data_cfg, seed=1, n_subjects=4, duration_s=16.0)
+    sd_splits = get_protocol_splits(
+        "subject_dependent",
+        multi_subject_epoch_dataset,
+        data_cfg,
+        seed=1,
+        n_subjects=4,
+        duration_s=16.0,
+    )
     assert len(sd_splits) == 1
 
-    loso = get_protocol_splits("loso", multi_subject_epoch_dataset, data_cfg, seed=1, n_subjects=4, duration_s=16.0)
+    loso = get_protocol_splits(
+        "loso", multi_subject_epoch_dataset, data_cfg, seed=1, n_subjects=4, duration_s=16.0
+    )
     n_subjects = len({ep.subject_id for ep in multi_subject_epoch_dataset})
     assert len(loso) == n_subjects
 
@@ -88,7 +97,14 @@ def test_run_fold_end_to_end_subject_dependent(small_epoch_dataset, tmp_path):
     test_epochs = [ep for ep in small_epoch_dataset if ep.subject_id == held_out]
 
     result = run_fold(
-        model_cfg, train_cfg, data_cfg, train_epochs, test_epochs, "fold0", tmp_path, torch.device("cpu")
+        model_cfg,
+        train_cfg,
+        data_cfg,
+        train_epochs,
+        test_epochs,
+        "fold0",
+        tmp_path,
+        torch.device("cpu"),
     )
     assert result["skipped"] is False
     assert "workload" in result["test"]
@@ -100,7 +116,13 @@ def test_run_end_to_end_subject_dependent_smoke(tmp_path):
     config = AeroMindConfig(
         data=DataConfig(processed_dir=str(tmp_path / "no_such_dir"), sequence_length=2),
         model=ModelConfig(name="aeromind_eegnet"),
-        train=TrainConfig(protocol="subject_dependent", epochs=2, batch_size=4, early_stop_patience=1, mixed_precision=False),
+        train=TrainConfig(
+            protocol="subject_dependent",
+            epochs=2,
+            batch_size=4,
+            early_stop_patience=1,
+            mixed_precision=False,
+        ),
         output_dir=str(tmp_path / "run"),
     )
     summary = run(config, n_subjects=3, duration_s=60.0)

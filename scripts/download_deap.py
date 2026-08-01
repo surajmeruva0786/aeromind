@@ -35,7 +35,9 @@ def validate(input_dir: str) -> int:
     present = {p.name for p in root.glob("*.dat")}
     missing = [s for s in EXPECTED_SUBJECTS if s not in present]
 
-    logger.info("Found %d/%d expected subject files in %s", len(present), len(EXPECTED_SUBJECTS), root)
+    logger.info(
+        "Found %d/%d expected subject files in %s", len(present), len(EXPECTED_SUBJECTS), root
+    )
     if missing:
         logger.warning("Missing: %s", ", ".join(missing[:5]) + (" ..." if len(missing) > 5 else ""))
         return 1

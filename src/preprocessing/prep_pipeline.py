@@ -52,7 +52,9 @@ def detect_bad_channels(
     median = np.median(stds)
     mad = np.median(np.abs(stds - median)) + 1e-12
     robust_z = 0.6745 * (stds - median) / mad
-    deviation_bad = [channel_names[i] for i in range(n_channels) if abs(robust_z[i]) > deviation_z_thresh]
+    deviation_bad = [
+        channel_names[i] for i in range(n_channels) if abs(robust_z[i]) > deviation_z_thresh
+    ]
 
     # Correlation criterion: a channel that is weakly correlated with the
     # average of all other channels is likely disconnected/noisy.

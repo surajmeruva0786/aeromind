@@ -21,7 +21,11 @@ from src.data.synthetic import CHANNEL_NAMES, generate_subject_record
 from src.preprocessing.epoching import epoch_continuous
 from src.preprocessing.filters import apply_standard_filters
 from src.preprocessing.ica_artefact import remove_artefacts
-from src.preprocessing.prep_pipeline import detect_bad_channels, interpolate_bad_channels, robust_average_reference
+from src.preprocessing.prep_pipeline import (
+    detect_bad_channels,
+    interpolate_bad_channels,
+    robust_average_reference,
+)
 from src.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
@@ -37,7 +41,9 @@ def _make_montage_info(channel_names: list[str], sfreq: float) -> mne.Info:
 
 
 def synthetic_raw(subject_id: int, duration_s: float, sfreq: float, seed: int) -> mne.io.RawArray:
-    record = generate_subject_record(subject_id=subject_id, duration_s=duration_s, sfreq=sfreq, seed=seed)
+    record = generate_subject_record(
+        subject_id=subject_id, duration_s=duration_s, sfreq=sfreq, seed=seed
+    )
     info = _make_montage_info(list(record.channel_names), sfreq)
     # synthetic amplitudes are microvolt-scale; MNE expects volts.
     raw = mne.io.RawArray(record.data * 1e-6, info, verbose=False)
@@ -76,11 +82,19 @@ def preprocess_raw(
 
     cleaned, ica_report = remove_artefacts(raw)
     logger.info(
-        "ICA (%s) excluded %d/%d components", ica_report.method, len(ica_report.excluded), ica_report.n_components
+        "ICA (%s) excluded %d/%d components",
+        ica_report.method,
+        len(ica_report.excluded),
+        ica_report.n_components,
     )
 
     result = epoch_continuous(cleaned, epoch_seconds=window, overlap=overlap)
-    logger.info("Kept %d/%d epochs (%d rejected)", result.n_total - result.n_rejected, result.n_total, result.n_rejected)
+    logger.info(
+        "Kept %d/%d epochs (%d rejected)",
+        result.n_total - result.n_rejected,
+        result.n_total,
+        result.n_rejected,
+    )
     return result.data
 
 
@@ -92,8 +106,12 @@ def main() -> int:
     parser.add_argument("--sfreq", type=float, default=256.0)
     parser.add_argument("--window", type=float, default=2.0)
     parser.add_argument("--overlap", type=float, default=0.5)
-    parser.add_argument("--n_subjects", type=int, default=8, help="Only used for --dataset synthetic")
-    parser.add_argument("--duration_s", type=float, default=300.0, help="Only used for --dataset synthetic")
+    parser.add_argument(
+        "--n_subjects", type=int, default=8, help="Only used for --dataset synthetic"
+    )
+    parser.add_argument(
+        "--duration_s", type=float, default=300.0, help="Only used for --dataset synthetic"
+    )
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 

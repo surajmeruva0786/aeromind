@@ -70,7 +70,10 @@ def main() -> int:
     except ImportError:
         pass
 
-    print("\n" + ("PASS: all required packages present." if ok else "FAIL: missing required packages."))
+    print(
+        "\n"
+        + ("PASS: all required packages present." if ok else "FAIL: missing required packages.")
+    )
     return 0 if ok else 1
 
 

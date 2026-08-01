@@ -65,7 +65,9 @@ def test_ewma_smoother_reset_clears_state():
 
 def test_streaming_engine_produces_predictions_once_context_fills():
     model = AeroMindEEGNet()
-    engine = StreamingEngine(model, sequence_length=3, window_samples=32, hop_samples=32, n_channels=7)
+    engine = StreamingEngine(
+        model, sequence_length=3, window_samples=32, hop_samples=32, n_channels=7
+    )
 
     events = []
     for sample, t in replay_synthetic(subject_id=0, duration_s=5.0, sfreq=256.0, realtime=False):

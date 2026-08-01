@@ -42,7 +42,11 @@ class PrimaryCapsule1D(nn.Module):
         self.num_types = num_types
         self.capsule_dim = capsule_dim
         self.conv = nn.Conv1d(
-            in_channels, num_types * capsule_dim, kernel_size=kernel_size, stride=stride, padding=padding
+            in_channels,
+            num_types * capsule_dim,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -82,7 +86,9 @@ class DigitCapsuleRouting(nn.Module):
         c = None
         for it in range(self.n_iterations):
             c = F.softmax(b, dim=2)  # (B, n_in, n_out)
-            s = (c.unsqueeze(-1) * (u_hat_detached if it < self.n_iterations - 1 else u_hat)).sum(dim=1)
+            s = (c.unsqueeze(-1) * (u_hat_detached if it < self.n_iterations - 1 else u_hat)).sum(
+                dim=1
+            )
             v = squash(s, dim=-1)  # (B, n_out, dim_out)
             if it < self.n_iterations - 1:
                 agreement = torch.einsum("bijd,bjd->bij", u_hat_detached, v)

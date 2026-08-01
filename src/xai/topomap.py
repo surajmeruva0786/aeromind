@@ -36,9 +36,7 @@ def plot_channel_topomap(
         fig = ax.figure
 
     vlim = max(abs(values.min()), abs(values.max()), 1e-8)
-    im, _ = mne.viz.plot_topomap(
-        values, info, axes=ax, show=False, cmap=cmap, vlim=(-vlim, vlim)
-    )
+    im, _ = mne.viz.plot_topomap(values, info, axes=ax, show=False, cmap=cmap, vlim=(-vlim, vlim))
     ax.set_title(title, fontsize=9, wrap=True)
     fig.colorbar(im, ax=ax, shrink=0.7)
     fig.tight_layout()

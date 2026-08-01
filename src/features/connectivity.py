@@ -36,7 +36,9 @@ def connectivity_features(
     epoch: np.ndarray, sfreq: float, bands: dict[str, tuple[float, float]] = CONNECTIVITY_BANDS
 ) -> dict[str, np.ndarray]:
     """PLV matrices for each requested band, keyed `plv_{band}`."""
-    return {f"plv_{band}": plv_matrix(epoch, sfreq, freq_range) for band, freq_range in bands.items()}
+    return {
+        f"plv_{band}": plv_matrix(epoch, sfreq, freq_range) for band, freq_range in bands.items()
+    }
 
 
 def frontal_parietal_connectivity(

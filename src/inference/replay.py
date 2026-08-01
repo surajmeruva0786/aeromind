@@ -50,11 +50,15 @@ def replay_synthetic(
 ) -> Iterator[tuple[np.ndarray, float]]:
     """Generates a fresh synthetic subject recording and replays it — the
     zero-setup default replay source (works with no external data)."""
-    record = generate_subject_record(subject_id=subject_id, duration_s=duration_s, sfreq=sfreq, seed=seed)
+    record = generate_subject_record(
+        subject_id=subject_id, duration_s=duration_s, sfreq=sfreq, seed=seed
+    )
     yield from replay_record(record, realtime=realtime, speed=speed)
 
 
-def replay_file(path: str, realtime: bool = True, speed: float = 1.0) -> Iterator[tuple[np.ndarray, float]]:
+def replay_file(
+    path: str, realtime: bool = True, speed: float = 1.0
+) -> Iterator[tuple[np.ndarray, float]]:
     """Replays a real `.edf`/`.bdf`/`.fif` recording via MNE. Only
     exercised when a real file is supplied (README §13's offline replay
     mode) — not covered by unit tests, which use `replay_synthetic`."""

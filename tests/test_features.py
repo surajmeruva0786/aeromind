@@ -1,7 +1,11 @@
 import numpy as np
 
 from src.data.synthetic import BANDS, CHANNEL_NAMES, generate_dataset
-from src.features.connectivity import connectivity_features, frontal_parietal_connectivity, plv_matrix
+from src.features.connectivity import (
+    connectivity_features,
+    frontal_parietal_connectivity,
+    plv_matrix,
+)
 from src.features.pipeline import extract_features, feature_names
 from src.features.spectral import band_powers, band_powers_matrix
 from src.features.temporal import hjorth_parameters, temporal_features, zero_crossing_rate
@@ -27,8 +31,12 @@ def test_workload_increases_theta_power_via_feature_extractor():
     epochs = generate_dataset(n_subjects=3, duration_s=120.0, seed=5)
     fz_idx = CHANNEL_NAMES.index("Fz")
 
-    low_theta = [band_powers(ep.data, 256.0)["theta_abs"][fz_idx] for ep in epochs if ep.workload == 0]
-    high_theta = [band_powers(ep.data, 256.0)["theta_abs"][fz_idx] for ep in epochs if ep.workload == 2]
+    low_theta = [
+        band_powers(ep.data, 256.0)["theta_abs"][fz_idx] for ep in epochs if ep.workload == 0
+    ]
+    high_theta = [
+        band_powers(ep.data, 256.0)["theta_abs"][fz_idx] for ep in epochs if ep.workload == 2
+    ]
     assert np.mean(high_theta) > np.mean(low_theta)
 
 
@@ -49,8 +57,15 @@ def test_temporal_features_keys():
     epoch = np.random.randn(7, 512)
     feats = temporal_features(epoch)
     expected_keys = {
-        "mean", "std", "kurtosis", "skewness", "hjorth_activity",
-        "hjorth_mobility", "hjorth_complexity", "line_length", "zero_crossing_rate",
+        "mean",
+        "std",
+        "kurtosis",
+        "skewness",
+        "hjorth_activity",
+        "hjorth_mobility",
+        "hjorth_complexity",
+        "line_length",
+        "zero_crossing_rate",
     }
     assert set(feats.keys()) == expected_keys
     assert all(v.shape == (7,) for v in feats.values())
@@ -81,7 +96,9 @@ def test_connectivity_features_keys():
 
 def test_frontal_parietal_connectivity_scalar():
     epoch = np.random.randn(7, 512)
-    value = frontal_parietal_connectivity(epoch, sfreq=256.0, frontal_idx=[0, 1], parietal_idx=[5, 6])
+    value = frontal_parietal_connectivity(
+        epoch, sfreq=256.0, frontal_idx=[0, 1], parietal_idx=[5, 6]
+    )
     assert 0.0 <= value <= 1.0
 
 

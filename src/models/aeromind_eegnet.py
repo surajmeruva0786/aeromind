@@ -33,7 +33,9 @@ class EEGNetEpochEncoder(nn.Module):
         f_depth = f1 * depth_multiplier
 
         # Block 1: temporal conv, then depthwise spatial conv across channels.
-        self.temporal_conv = nn.Conv2d(1, f1, kernel_size=(1, kernel_length), padding=(0, kernel_length // 2), bias=False)
+        self.temporal_conv = nn.Conv2d(
+            1, f1, kernel_size=(1, kernel_length), padding=(0, kernel_length // 2), bias=False
+        )
         self.bn1 = nn.BatchNorm2d(f1)
         self.depthwise_conv = nn.Conv2d(
             f1, f_depth, kernel_size=(n_channels, 1), groups=f1, bias=False
@@ -85,11 +87,15 @@ class AeroMindEEGNet(nn.Module):
         super().__init__()
         del n_samples  # unused: encoder is adaptive-pooled, doesn't need fixed length
         self.encoder = EEGNetEpochEncoder(n_channels, f1, depth_multiplier, f2)
-        self.lstm = nn.LSTM(self.encoder.feature_dim, lstm_hidden, batch_first=True, bidirectional=True)
+        self.lstm = nn.LSTM(
+            self.encoder.feature_dim, lstm_hidden, batch_first=True, bidirectional=True
+        )
         self.workload_head = nn.Linear(lstm_hidden * 2, n_workload_classes)
         self.fatigue_head = nn.Linear(lstm_hidden * 2, n_fatigue_classes)
 
-    def forward(self, x: torch.Tensor, workload_target: torch.Tensor | None = None) -> dict[str, torch.Tensor]:
+    def forward(
+        self, x: torch.Tensor, workload_target: torch.Tensor | None = None
+    ) -> dict[str, torch.Tensor]:
         """`x`: (B, L, C, T). `workload_target` accepted for interface parity, unused."""
         del workload_target
         batch, seq_len, n_channels, n_samples = x.shape

@@ -61,7 +61,9 @@ class AeroMindCNNLSTM(nn.Module):
         self.workload_head = nn.Linear(lstm_hidden * 2, n_workload_classes)
         self.fatigue_head = nn.Linear(lstm_hidden * 2, n_fatigue_classes)
 
-    def forward(self, x: torch.Tensor, workload_target: torch.Tensor | None = None) -> dict[str, torch.Tensor]:
+    def forward(
+        self, x: torch.Tensor, workload_target: torch.Tensor | None = None
+    ) -> dict[str, torch.Tensor]:
         """`x`: (B, L, C, T). `workload_target` is accepted for interface
         parity with AeroMindCapsNet but unused (no reconstruction head)."""
         del workload_target

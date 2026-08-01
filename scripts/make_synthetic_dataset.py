@@ -69,7 +69,9 @@ def main() -> int:
         logger.info("Wrote %s (%d epochs)", subj_path, len(epochs))
 
     with open(out / "index.csv", "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["subject", "n_epochs", "workload_counts", "fatigue_counts"])
+        writer = csv.DictWriter(
+            f, fieldnames=["subject", "n_epochs", "workload_counts", "fatigue_counts"]
+        )
         writer.writeheader()
         writer.writerows(index_rows)
 

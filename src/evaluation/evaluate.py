@@ -61,7 +61,9 @@ def evaluate_checkpoint(
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    epochs = load_epochs(config.data, n_subjects=n_subjects, duration_s=duration_s, seed=config.train.seed)
+    epochs = load_epochs(
+        config.data, n_subjects=n_subjects, duration_s=duration_s, seed=config.train.seed
+    )
     splits = get_protocol_splits(
         config.train.protocol, epochs, config.data, config.train.seed, n_subjects, duration_s
     )
@@ -73,7 +75,9 @@ def evaluate_checkpoint(
 
     test_ds = SequenceEpochDataset(split.test, sequence_length=config.data.sequence_length)
     if len(test_ds) == 0:
-        raise ValueError(f"Fold '{fold_name}' has zero test sequences for sequence_length={config.data.sequence_length}")
+        raise ValueError(
+            f"Fold '{fold_name}' has zero test sequences for sequence_length={config.data.sequence_length}"
+        )
 
     loader = DataLoader(test_ds, batch_size=batch_size or config.train.batch_size)
 
@@ -81,7 +85,12 @@ def evaluate_checkpoint(
     load_checkpoint(checkpoint_path, model, map_location=str(device))
 
     result = evaluate_epoch(
-        model, loader, config.train, device, config.model.n_workload_classes, config.model.n_fatigue_classes
+        model,
+        loader,
+        config.train,
+        device,
+        config.model.n_workload_classes,
+        config.model.n_fatigue_classes,
     )
 
     meta = {
@@ -96,12 +105,31 @@ def evaluate_checkpoint(
 
 
 def build_argparser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--checkpoint", required=True, help="Path to a best.ckpt saved by src.training.train")
-    parser.add_argument("--config", default=None, help="Path to config.yaml (default: inferred from checkpoint path)")
-    parser.add_argument("--fold", default="subject_dependent", help="Fold/split name matching the checkpoint (e.g. loso_subject_3)")
-    parser.add_argument("--n_subjects", type=int, default=8, help="Must match the training run's --n_subjects for a deterministic split rebuild")
-    parser.add_argument("--duration_s", type=float, default=180.0, help="Must match the training run's --duration_s")
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "--checkpoint", required=True, help="Path to a best.ckpt saved by src.training.train"
+    )
+    parser.add_argument(
+        "--config",
+        default=None,
+        help="Path to config.yaml (default: inferred from checkpoint path)",
+    )
+    parser.add_argument(
+        "--fold",
+        default="subject_dependent",
+        help="Fold/split name matching the checkpoint (e.g. loso_subject_3)",
+    )
+    parser.add_argument(
+        "--n_subjects",
+        type=int,
+        default=8,
+        help="Must match the training run's --n_subjects for a deterministic split rebuild",
+    )
+    parser.add_argument(
+        "--duration_s", type=float, default=180.0, help="Must match the training run's --duration_s"
+    )
     parser.add_argument("--batch_size", type=int, default=None)
     parser.add_argument("--output_dir", default="results/eval_run")
     return parser
@@ -134,8 +162,10 @@ def main() -> int:
     logger.info("Evaluation complete: %s", {k: v for k, v in meta.items()})
     logger.info(
         "Workload accuracy=%.3f macro-F1=%.3f | Fatigue accuracy=%.3f macro-F1=%.3f",
-        result.workload_report.accuracy, result.workload_report.macro_f1,
-        result.fatigue_report.accuracy, result.fatigue_report.macro_f1,
+        result.workload_report.accuracy,
+        result.workload_report.macro_f1,
+        result.fatigue_report.accuracy,
+        result.fatigue_report.macro_f1,
     )
     return 0
 

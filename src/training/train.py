@@ -50,7 +50,10 @@ def _load_npz_epochs(processed_dir: Path) -> list[SyntheticEpoch]:
         for i in range(len(workload)):
             epochs.append(
                 SyntheticEpoch(
-                    data=data[i], workload=int(workload[i]), fatigue=int(fatigue[i]), subject_id=subject_id
+                    data=data[i],
+                    workload=int(workload[i]),
+                    fatigue=int(fatigue[i]),
+                    subject_id=subject_id,
                 )
             )
     return epochs
@@ -146,9 +149,15 @@ def run_fold(
     test_loader = DataLoader(test_ds, batch_size=train_config.batch_size)
 
     model = build_model(model_config, data_config).to(device)
-    optimizer = AdamW(model.parameters(), lr=train_config.lr, weight_decay=train_config.weight_decay)
-    scheduler = ReduceLROnPlateau(optimizer, mode="min", factor=train_config.lr_factor, patience=train_config.lr_patience)
-    scaler = torch.amp.GradScaler("cuda", enabled=train_config.mixed_precision and device.type == "cuda")
+    optimizer = AdamW(
+        model.parameters(), lr=train_config.lr, weight_decay=train_config.weight_decay
+    )
+    scheduler = ReduceLROnPlateau(
+        optimizer, mode="min", factor=train_config.lr_factor, patience=train_config.lr_patience
+    )
+    scaler = torch.amp.GradScaler(
+        "cuda", enabled=train_config.mixed_precision and device.type == "cuda"
+    )
     early_stopping = EarlyStopping(patience=train_config.early_stop_patience, mode="min")
 
     fold_dir = output_dir / fold_name
@@ -159,18 +168,30 @@ def run_fold(
     epochs_run = 0
     for epoch in range(train_config.epochs):
         train_metrics = train_one_epoch(
-            model, train_loader, optimizer, train_config, device, scaler if scaler.is_enabled() else None
+            model,
+            train_loader,
+            optimizer,
+            train_config,
+            device,
+            scaler if scaler.is_enabled() else None,
         )
         val_result = evaluate_epoch(
-            model, val_loader, train_config, device,
-            model_config.n_workload_classes, model_config.n_fatigue_classes,
+            model,
+            val_loader,
+            train_config,
+            device,
+            model_config.n_workload_classes,
+            model_config.n_fatigue_classes,
         )
         scheduler.step(val_result.loss)
         run_logger.log_epoch(
             epoch,
             train_metrics,
-            {"loss": val_result.loss, "workload_accuracy": val_result.workload_report.accuracy,
-             "workload_macro_f1": val_result.workload_report.macro_f1},
+            {
+                "loss": val_result.loss,
+                "workload_accuracy": val_result.workload_report.accuracy,
+                "workload_macro_f1": val_result.workload_report.macro_f1,
+            },
         )
         epochs_run = epoch + 1
 
@@ -184,8 +205,12 @@ def run_fold(
     if ckpt_path.exists():
         load_checkpoint(ckpt_path, model)
     test_result = evaluate_epoch(
-        model, test_loader, train_config, device,
-        model_config.n_workload_classes, model_config.n_fatigue_classes,
+        model,
+        test_loader,
+        train_config,
+        device,
+        model_config.n_workload_classes,
+        model_config.n_fatigue_classes,
     )
 
     result = {
@@ -208,7 +233,9 @@ def run(config: AeroMindConfig, n_subjects: int, duration_s: float) -> dict:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logger.info("Device: %s", device)
 
-    epochs = load_epochs(config.data, n_subjects=n_subjects, duration_s=duration_s, seed=config.train.seed)
+    epochs = load_epochs(
+        config.data, n_subjects=n_subjects, duration_s=duration_s, seed=config.train.seed
+    )
     logger.info("Loaded %d epochs, class balance: %s", len(epochs), class_balance(epochs))
 
     splits = get_protocol_splits(
@@ -222,7 +249,14 @@ def run(config: AeroMindConfig, n_subjects: int, duration_s: float) -> dict:
     fold_results = []
     for split in splits:
         result = run_fold(
-            config.model, config.train, config.data, split.train, split.test, split.name, output_dir, device
+            config.model,
+            config.train,
+            config.data,
+            split.train,
+            split.test,
+            split.name,
+            output_dir,
+            device,
         )
         fold_results.append(result)
 
@@ -250,18 +284,35 @@ def run(config: AeroMindConfig, n_subjects: int, duration_s: float) -> dict:
 
 
 def build_argparser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("--config", default=None, help="Optional YAML config path (configs/*.yaml)")
-    parser.add_argument("--model", default="aeromind_capsnet", choices=["aeromind_capsnet", "aeromind_cnn_lstm", "aeromind_eegnet"])
+    parser.add_argument(
+        "--model",
+        default="aeromind_capsnet",
+        choices=["aeromind_capsnet", "aeromind_cnn_lstm", "aeromind_eegnet"],
+    )
     parser.add_argument("--dataset", default="synthetic", choices=["synthetic"])
-    parser.add_argument("--protocol", default="subject_dependent", choices=["subject_dependent", "loso", "cross_dataset"])
+    parser.add_argument(
+        "--protocol",
+        default="subject_dependent",
+        choices=["subject_dependent", "loso", "cross_dataset"],
+    )
     parser.add_argument("--epochs", type=int, default=150)
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--lr", type=float, default=5e-4)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--sequence_length", type=int, default=15)
-    parser.add_argument("--n_subjects", type=int, default=8, help="Used only when generating synthetic data in-memory")
-    parser.add_argument("--duration_s", type=float, default=300.0, help="Per-subject synthetic recording length")
+    parser.add_argument(
+        "--n_subjects",
+        type=int,
+        default=8,
+        help="Used only when generating synthetic data in-memory",
+    )
+    parser.add_argument(
+        "--duration_s", type=float, default=300.0, help="Per-subject synthetic recording length"
+    )
     parser.add_argument("--processed_dir", default="data/processed/synthetic")
     parser.add_argument("--output_dir", default="runs/default")
     return parser
@@ -272,9 +323,19 @@ def main() -> int:
 
     if args.config:
         config = AeroMindConfig(
-            data=DataConfig(dataset=args.dataset, processed_dir=args.processed_dir, sequence_length=args.sequence_length),
+            data=DataConfig(
+                dataset=args.dataset,
+                processed_dir=args.processed_dir,
+                sequence_length=args.sequence_length,
+            ),
             model=ModelConfig(name=args.model),
-            train=TrainConfig(protocol=args.protocol, epochs=args.epochs, batch_size=args.batch_size, lr=args.lr, seed=args.seed),
+            train=TrainConfig(
+                protocol=args.protocol,
+                epochs=args.epochs,
+                batch_size=args.batch_size,
+                lr=args.lr,
+                seed=args.seed,
+            ),
             output_dir=args.output_dir,
         )
         from src.utils.config import load_config
@@ -283,10 +344,18 @@ def main() -> int:
         config.data, config.model, config.train = loaded.data, loaded.model, loaded.train
     else:
         config = AeroMindConfig(
-            data=DataConfig(dataset=args.dataset, processed_dir=args.processed_dir, sequence_length=args.sequence_length),
+            data=DataConfig(
+                dataset=args.dataset,
+                processed_dir=args.processed_dir,
+                sequence_length=args.sequence_length,
+            ),
             model=ModelConfig(name=args.model),
             train=TrainConfig(
-                protocol=args.protocol, epochs=args.epochs, batch_size=args.batch_size, lr=args.lr, seed=args.seed
+                protocol=args.protocol,
+                epochs=args.epochs,
+                batch_size=args.batch_size,
+                lr=args.lr,
+                seed=args.seed,
             ),
             output_dir=args.output_dir,
         )

@@ -20,7 +20,9 @@ except Exception:  # pragma: no cover - hardware/environment dependent
     LSL_AVAILABLE = False
 
 
-def stream_lsl(stream_type: str = "EEG", timeout: float = 5.0) -> Iterator[tuple[np.ndarray, float]]:
+def stream_lsl(
+    stream_type: str = "EEG", timeout: float = 5.0
+) -> Iterator[tuple[np.ndarray, float]]:
     """Yields `(sample, lsl_timestamp)` pairs from the first resolved LSL
     stream of the given type. Raises `RuntimeError` if `pylsl`/`liblsl`
     isn't usable in this environment, or if no matching stream is found

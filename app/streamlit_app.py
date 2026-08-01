@@ -67,7 +67,9 @@ def _init_state() -> None:
             st.session_state[key] = value
 
 
-def build_engine(model_name: str, checkpoint_path: str | None, sequence_length: int) -> StreamingEngine:
+def build_engine(
+    model_name: str, checkpoint_path: str | None, sequence_length: int
+) -> StreamingEngine:
     data_config = DataConfig(sfreq=SFREQ, epoch_seconds=WINDOW_S, sequence_length=sequence_length)
     model = build_model(ModelConfig(name=model_name), data_config)
 
@@ -90,7 +92,9 @@ def render_sidebar() -> dict:
     with st.sidebar:
         st.header("Source & model")
         source = st.radio("Replay source", ["Synthetic (zero setup)", "Upload .edf/.bdf/.fif"])
-        model_name = st.selectbox("Model", ["aeromind_capsnet", "aeromind_cnn_lstm", "aeromind_eegnet"])
+        model_name = st.selectbox(
+            "Model", ["aeromind_capsnet", "aeromind_cnn_lstm", "aeromind_eegnet"]
+        )
         checkpoint_path = st.text_input("Checkpoint path (optional)", value="")
         n_steps_per_tick = st.slider("Samples processed per refresh", 32, 512, 128, step=32)
 
@@ -113,15 +117,21 @@ def render_sidebar() -> dict:
 
 
 def handle_start(controls: dict) -> None:
-    st.session_state.engine = build_engine(controls["model_name"], controls["checkpoint_path"] or None, SEQUENCE_LENGTH)
+    st.session_state.engine = build_engine(
+        controls["model_name"], controls["checkpoint_path"] or None, SEQUENCE_LENGTH
+    )
     st.session_state.history = []
     st.session_state.eeg_buffer = []
 
     if controls["source"] == "Synthetic (zero setup)":
-        st.session_state.replay_iter = replay_synthetic(duration_s=600.0, sfreq=SFREQ, realtime=False)
+        st.session_state.replay_iter = replay_synthetic(
+            duration_s=600.0, sfreq=SFREQ, realtime=False
+        )
         st.session_state.running = True
     elif controls["uploaded_file"] is not None:
-        tmp_path = Path(tempfile.gettempdir()) / "aeromind_streamlit" / controls["uploaded_file"].name
+        tmp_path = (
+            Path(tempfile.gettempdir()) / "aeromind_streamlit" / controls["uploaded_file"].name
+        )
         tmp_path.parent.mkdir(parents=True, exist_ok=True)
         tmp_path.write_bytes(controls["uploaded_file"].read())
         st.session_state.replay_iter = replay_file(str(tmp_path), realtime=False)
@@ -165,11 +175,16 @@ def render_live_panels(latest_event) -> None:
         with col1:
             st.subheader("Workload")
             st.bar_chart(
-                pd.DataFrame({"probability": latest_event.smoothed_workload_probs}, index=list(WORKLOAD_LABELS))
+                pd.DataFrame(
+                    {"probability": latest_event.smoothed_workload_probs},
+                    index=list(WORKLOAD_LABELS),
+                )
             )
         with col2:
             st.subheader("Fatigue")
-            fatigued_prob = float(latest_event.smoothed_fatigue_probs[FATIGUE_LABELS.index("fatigued")])
+            fatigued_prob = float(
+                latest_event.smoothed_fatigue_probs[FATIGUE_LABELS.index("fatigued")]
+            )
             st.metric("Fatigue probability", f"{fatigued_prob:.0%}")
             st.progress(min(max(fatigued_prob, 0.0), 1.0))
 
@@ -183,14 +198,18 @@ def render_explainability() -> None:
     if st.button("Explain current prediction (SHAP topomap)"):
         engine = st.session_state.engine
         if engine is None or len(engine.epoch_sequence) < SEQUENCE_LENGTH:
-            st.info("Not enough streaming context yet — start a session and let it run for a bit first.")
+            st.info(
+                "Not enough streaming context yet — start a session and let it run for a bit first."
+            )
             return
         seq = np.stack(engine.epoch_sequence, axis=0)
         x = torch.from_numpy(seq).unsqueeze(0)
         background = x.repeat(4, 1, 1, 1) + torch.randn(4, *seq.shape) * 0.01
         attribution = compute_channel_attributions(engine.model, background, x, CHANNEL_NAMES)
         fig = plot_channel_topomap(
-            attribution.channel_values[0], CHANNEL_NAMES, title="Channel attribution (current window)"
+            attribution.channel_values[0],
+            CHANNEL_NAMES,
+            title="Channel attribution (current window)",
         )
         st.pyplot(fig)
 
@@ -201,7 +220,10 @@ def render_session_export() -> None:
         df = pd.DataFrame(st.session_state.history)
         st.dataframe(df.tail(20))
         st.download_button(
-            "Download session CSV", df.to_csv(index=False), file_name="aeromind_session.csv", mime="text/csv"
+            "Download session CSV",
+            df.to_csv(index=False),
+            file_name="aeromind_session.csv",
+            mime="text/csv",
         )
     else:
         st.caption("No predictions recorded yet this session.")
@@ -231,7 +253,11 @@ def main() -> None:
         )
 
     latest_event = None
-    if st.session_state.running and st.session_state.engine is not None and st.session_state.replay_iter is not None:
+    if (
+        st.session_state.running
+        and st.session_state.engine is not None
+        and st.session_state.replay_iter is not None
+    ):
         latest_event = step_replay(controls["n_steps_per_tick"])
 
     render_live_panels(latest_event)

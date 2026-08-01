@@ -53,7 +53,9 @@ def loso_splits(epochs: list[SyntheticEpoch]) -> list[Split]:
 
 
 def cross_dataset_split(
-    train_epochs: list[SyntheticEpoch], test_epochs: list[SyntheticEpoch], name: str = "cross_dataset"
+    train_epochs: list[SyntheticEpoch],
+    test_epochs: list[SyntheticEpoch],
+    name: str = "cross_dataset",
 ) -> Split:
     return Split(train=list(train_epochs), test=list(test_epochs), name=name)
 

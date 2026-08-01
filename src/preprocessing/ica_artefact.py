@@ -15,7 +15,13 @@ import mne
 import numpy as np
 from scipy.stats import kurtosis
 
-ICLABEL_REJECT_CATEGORIES = {"eye blink", "muscle artifact", "line noise", "heart beat", "channel noise"}
+ICLABEL_REJECT_CATEGORIES = {
+    "eye blink",
+    "muscle artifact",
+    "line noise",
+    "heart beat",
+    "channel noise",
+}
 ICLABEL_REJECT_PROB = 0.8
 
 
@@ -27,7 +33,9 @@ class ICAArtefactReport:
     labels: dict[int, str] = field(default_factory=dict)
 
 
-def fit_ica(raw: mne.io.BaseRaw, n_components: int | None = None, random_state: int = 42) -> mne.preprocessing.ICA:
+def fit_ica(
+    raw: mne.io.BaseRaw, n_components: int | None = None, random_state: int = 42
+) -> mne.preprocessing.ICA:
     # Average referencing and/or bad-channel interpolation upstream (see
     # prep_pipeline.py) both reduce the true rank of the data below
     # n_channels; requesting more ICA components than that rank produces a
@@ -50,7 +58,9 @@ def fit_ica(raw: mne.io.BaseRaw, n_components: int | None = None, random_state: 
     return ica
 
 
-def _classify_with_iclabel(raw: mne.io.BaseRaw, ica: mne.preprocessing.ICA) -> ICAArtefactReport | None:
+def _classify_with_iclabel(
+    raw: mne.io.BaseRaw, ica: mne.preprocessing.ICA
+) -> ICAArtefactReport | None:
     try:
         from mne_icalabel import label_components
     except ImportError:
@@ -102,10 +112,14 @@ def _classify_with_heuristics(
         else:
             labels[i] = "brain (heuristic)"
 
-    return ICAArtefactReport(n_components=ica.n_components_, excluded=excluded, method="heuristic", labels=labels)
+    return ICAArtefactReport(
+        n_components=ica.n_components_, excluded=excluded, method="heuristic", labels=labels
+    )
 
 
-def remove_artefacts(raw: mne.io.BaseRaw, ica: mne.preprocessing.ICA | None = None) -> tuple[mne.io.BaseRaw, ICAArtefactReport]:
+def remove_artefacts(
+    raw: mne.io.BaseRaw, ica: mne.preprocessing.ICA | None = None
+) -> tuple[mne.io.BaseRaw, ICAArtefactReport]:
     """Fit (if needed), classify, exclude flagged components, and return the
     cleaned Raw plus a report of what was removed and why."""
     ica = ica or fit_ica(raw)

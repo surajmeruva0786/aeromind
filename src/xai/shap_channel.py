@@ -65,5 +65,7 @@ def compute_channel_attributions(
         channel_values[i] = shap_values[i, :, :, :, cls].mean(axis=(0, 2))
 
     return ChannelAttribution(
-        channel_values=channel_values, predicted_classes=predicted_classes, channel_names=channel_names
+        channel_values=channel_values,
+        predicted_classes=predicted_classes,
+        channel_names=channel_names,
     )

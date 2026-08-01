@@ -19,7 +19,9 @@ def band_powers(
     `{band}_abs`, `{band}_rel`, `{band}_log`, each an `(n_channels,)` array.
     """
     nperseg = min(256, epoch.shape[-1])
-    freqs, psd = welch(epoch, fs=sfreq, window="hamming", nperseg=nperseg, noverlap=nperseg // 2, axis=-1)
+    freqs, psd = welch(
+        epoch, fs=sfreq, window="hamming", nperseg=nperseg, noverlap=nperseg // 2, axis=-1
+    )
 
     total_power = psd.sum(axis=-1) + 1e-12
     out: dict[str, np.ndarray] = {}
@@ -32,7 +34,9 @@ def band_powers(
     return out
 
 
-def band_powers_matrix(epoch: np.ndarray, sfreq: float, bands: dict[str, tuple[float, float]] = BANDS) -> np.ndarray:
+def band_powers_matrix(
+    epoch: np.ndarray, sfreq: float, bands: dict[str, tuple[float, float]] = BANDS
+) -> np.ndarray:
     """Same as `band_powers` but stacked as `(n_channels, n_bands)` absolute
     power — the layout `src/xai/spectral_attribution.py` explains SHAP over.
     """

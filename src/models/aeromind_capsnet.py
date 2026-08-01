@@ -18,7 +18,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from src.models.layers import DigitCapsuleRouting, PrimaryCapsule1D, squash
+from src.models.layers import DigitCapsuleRouting, PrimaryCapsule1D
 
 
 def _conv1d_output_length(length: int, kernel_size: int, stride: int, padding: int) -> int:
@@ -74,7 +74,11 @@ class CapsNetEncoder(nn.Module):
         )
         n_in = primary_types * primary_t_out
         self.routing = DigitCapsuleRouting(
-            n_in=n_in, dim_in=primary_dim, n_out=digit_capsules, dim_out=digit_dim, n_iterations=routing_iters
+            n_in=n_in,
+            dim_in=primary_dim,
+            n_out=digit_capsules,
+            dim_out=digit_dim,
+            n_iterations=routing_iters,
         )
         self.digit_capsules = digit_capsules
         self.digit_dim = digit_dim
@@ -154,7 +158,9 @@ class AeroMindCapsNet(nn.Module):
         self.workload_head = nn.Linear(lstm_hidden * 2, n_workload_classes)
         self.fatigue_head = nn.Linear(lstm_hidden * 2, n_fatigue_classes)
 
-    def forward(self, x: torch.Tensor, workload_target: torch.Tensor | None = None) -> dict[str, torch.Tensor]:
+    def forward(
+        self, x: torch.Tensor, workload_target: torch.Tensor | None = None
+    ) -> dict[str, torch.Tensor]:
         """`x`: (B, L, C, T) — L consecutive epochs (30s context window).
         `workload_target`: (B,) ground-truth class to drive reconstruction
         during training; if None, uses the model's own prediction (inference).
@@ -175,8 +181,12 @@ class AeroMindCapsNet(nn.Module):
         # Reconstruction uses the *last* epoch in the window (the one the
         # heads are predicting for) and its digit capsule.
         last_epoch = x[:, -1]  # (B, C, T)
-        last_digit_capsules = digit_capsules.reshape(batch, seq_len, self.n_workload_classes, -1)[:, -1]
-        recon_class = workload_target if workload_target is not None else workload_logits.argmax(dim=-1)
+        last_digit_capsules = digit_capsules.reshape(batch, seq_len, self.n_workload_classes, -1)[
+            :, -1
+        ]
+        recon_class = (
+            workload_target if workload_target is not None else workload_logits.argmax(dim=-1)
+        )
         reconstruction = self.decoder(last_digit_capsules, recon_class)
         reconstruction_target = self.decoder.target(last_epoch)
 

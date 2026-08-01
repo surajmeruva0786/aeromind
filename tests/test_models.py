@@ -34,7 +34,9 @@ def test_squash_preserves_direction_and_bounds_length():
 
 
 def test_primary_capsule_output_shape():
-    layer = PrimaryCapsule1D(in_channels=64, num_types=32, capsule_dim=8, kernel_size=9, stride=16, padding=4)
+    layer = PrimaryCapsule1D(
+        in_channels=64, num_types=32, capsule_dim=8, kernel_size=9, stride=16, padding=4
+    )
     x = torch.randn(3, 64, 256)
     out = layer(x)
     # T_out = floor((256 + 8 - 9)/16) + 1 = 16 -> n_in = 32*16 = 512

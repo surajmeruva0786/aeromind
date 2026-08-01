@@ -17,7 +17,9 @@ def bandpass_filter(
     return sosfiltfilt(sos, data, axis=-1)
 
 
-def notch_filter(data: np.ndarray, sfreq: float, freq: float = 50.0, quality: float = 30.0) -> np.ndarray:
+def notch_filter(
+    data: np.ndarray, sfreq: float, freq: float = 50.0, quality: float = 30.0
+) -> np.ndarray:
     """Zero-phase notch filter to remove mains interference (50 Hz in India)."""
     b, a = iirnotch(freq, quality, sfreq)
     sos = tf2sos(b, a)

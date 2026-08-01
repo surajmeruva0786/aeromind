@@ -4,8 +4,6 @@ markdown report generator sanity check (README roadmap step 82)."""
 
 from __future__ import annotations
 
-import torch
-
 from src.evaluation.evaluate import evaluate_checkpoint, find_run_config
 from src.evaluation.metrics_report import generate_report
 from src.training.train import run
@@ -16,7 +14,9 @@ def _train_tiny_run(tmp_path, protocol="subject_dependent"):
     config = AeroMindConfig(
         data=DataConfig(processed_dir=str(tmp_path / "no_such_dir"), sequence_length=2),
         model=ModelConfig(name="aeromind_eegnet"),
-        train=TrainConfig(protocol=protocol, epochs=2, batch_size=4, early_stop_patience=1, mixed_precision=False),
+        train=TrainConfig(
+            protocol=protocol, epochs=2, batch_size=4, early_stop_patience=1, mixed_precision=False
+        ),
         output_dir=str(tmp_path / "run"),
     )
     summary = run(config, n_subjects=3, duration_s=60.0)
@@ -56,7 +56,9 @@ def test_evaluate_checkpoint_loso_fold(tmp_path):
     fold_name = fold_names[0]
 
     checkpoint_path = tmp_path / "run" / fold_name / "best.ckpt"
-    result, meta = evaluate_checkpoint(config, checkpoint_path, fold_name=fold_name, n_subjects=3, duration_s=60.0)
+    result, meta = evaluate_checkpoint(
+        config, checkpoint_path, fold_name=fold_name, n_subjects=3, duration_s=60.0
+    )
     assert meta["fold"] == fold_name
     assert 0.0 <= result.workload_report.accuracy <= 1.0
 

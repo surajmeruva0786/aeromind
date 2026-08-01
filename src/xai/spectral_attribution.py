@@ -59,4 +59,6 @@ def compute_spectral_attribution(
     n_samples, n_features, n_classes = raw.shape
     n_bands = n_features // n_channels
     reshaped = raw.reshape(n_samples, n_channels, n_bands, n_classes)
-    return SpectralAttributionResult(shap_values=reshaped, channel_names=channel_names, band_names=band_names)
+    return SpectralAttributionResult(
+        shap_values=reshaped, channel_names=channel_names, band_names=band_names
+    )

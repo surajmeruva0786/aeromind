@@ -16,12 +16,11 @@ import json
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
 from src.data.dataset import SequenceEpochDataset
-from src.data.synthetic import BANDS, CHANNEL_NAMES
+from src.data.synthetic import CHANNEL_NAMES
 from src.evaluation.evaluate import find_run_config
 from src.models.registry import build_model
 from src.training.train import load_epochs
@@ -53,7 +52,9 @@ def run_explain(
     config = load_config(config_path or find_run_config(checkpoint_path))
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    epochs = load_epochs(config.data, n_subjects=n_subjects, duration_s=duration_s, seed=config.train.seed)
+    epochs = load_epochs(
+        config.data, n_subjects=n_subjects, duration_s=duration_s, seed=config.train.seed
+    )
     subject_epochs = [ep for ep in epochs if ep.subject_id == subject_id]
     if not subject_epochs:
         raise ValueError(f"No epochs found for subject_id={subject_id}")
@@ -108,7 +109,9 @@ def run_explain(
         fig.savefig(spectral_path, dpi=120)
         plt.close(fig)
     else:
-        logger.warning("Subject %d has only one workload class present — skipping spectral SHAP", subject_id)
+        logger.warning(
+            "Subject %d has only one workload class present — skipping spectral SHAP", subject_id
+        )
 
     # --- 3. Counter-factual probe on the highest-workload sequence -------
     high_idx = int(all_workload.argmax())
@@ -136,13 +139,18 @@ def run_explain(
     (output_dir / "xai_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     logger.info(
         "XAI run complete for subject %d: counter-factual probe passed=%s (class %d -> %d)",
-        subject_id, probe_result.passed, probe_result.original_class, probe_result.attenuated_class,
+        subject_id,
+        probe_result.passed,
+        probe_result.original_class,
+        probe_result.attenuated_class,
     )
     return summary
 
 
 def build_argparser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("--checkpoint", required=True)
     parser.add_argument("--config", default=None)
     parser.add_argument("--subject_id", type=int, default=0)
