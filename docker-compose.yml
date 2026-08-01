@@ -1,0 +1,22 @@
+services:
+  app:
+    build: .
+    image: aeromind:latest
+    ports:
+      - "8501:8501"
+    volumes:
+      # Trained checkpoints and generated results persist on the host so
+      # they survive `docker compose down` — both are gitignored/partially
+      # gitignored already (see .gitignore), so this doesn't leak into git.
+      - ./runs:/app/runs
+      - ./results:/app/results
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    restart: unless-stopped
